@@ -1,4 +1,4 @@
-package com.example.mypostsapp.ui.main
+package com.example.mypostsapp.ui.Login
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

@@ -14,8 +14,8 @@ import androidx.navigation.fragment.findNavController
 import com.example.mypostsapp.AlertDialogUtils
 import com.example.mypostsapp.MainActivity
 import com.example.mypostsapp.R
-import com.example.mypostsapp.databinding.ActivityMainBinding
 import com.example.mypostsapp.databinding.FragmentMainBinding
+import com.example.mypostsapp.ui.Login.LoginViewModel
 
 class LoginFragment : Fragment() {
 
