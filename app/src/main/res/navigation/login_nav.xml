@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/login_nav"
+    app:startDestination="@id/login">
+    <fragment
+        android:id="@+id/login"
+        android:name="com.example.mypostsapp.ui.main.LoginFragment"
+        tools:layout="@layout/fragment_main">
+        <action
+            android:id="@+id/login_navigation_to_create_fragment"
+            app:destination="@id/createProfile" />
+    </fragment>
+    <fragment
+        android:id="@+id/createProfile"
+        android:name="com.example.mypostsapp.CreateProfileFragment"
+        tools:layout="@layout/fragment_create_profile" >
+        <action
+            android:id="@+id/action_creteProfile_to_login"
+            app:destination="@id/login" />
+    </fragment>
+
+</navigation>
