@@ -5,11 +5,15 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mypostsapp.entities.User
+import com.example.mypostsapp.room.RoomManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
 class CreateProfileViewModel : ViewModel() {
@@ -21,16 +25,21 @@ class CreateProfileViewModel : ViewModel() {
 
 
     init {
-        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) {
+        val uid = FirebaseAuth.getInstance().uid!!
+        DataBaseManager.getCurrentUser(uid) {
             if (it.isSuccessful) {
                 currentUser.value = it.result.toObject(User::class.java)
                 currentUser.postValue(currentUser.value)
+                viewModelScope.launch(Dispatchers.IO) {
+                    currentUser.value?.let { user->
+                        RoomManager.database.userDao().insertUser(user)
+                    }
+                }
             }
-
         }
     }
-    fun createProfile(uid: String, fullName: String, imageBitmap: Bitmap?) {
 
+    fun createProfile(uid: String, fullName: String, imageBitmap: Bitmap?) {
         imageBitmap?.let {
             // the image name should be the user uuid - uniqe
             val imageRef: StorageReference = storage.reference.child("images/" + String + ".jpg")
@@ -63,5 +72,9 @@ class CreateProfileViewModel : ViewModel() {
                 onError.postValue(it.exception?.message ?: "")
             }
         }
+    }
+
+    fun signOut() {
+        FirebaseAuth.getInstance().signOut()
     }
 }

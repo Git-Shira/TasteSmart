@@ -1,0 +1,830 @@
+Index: app/src/main/java/com/example/mypostsapp/ui/Login/LoginFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp.ui.main\n\nimport android.app.ProgressDialog\nimport android.content.Intent\nimport androidx.lifecycle.ViewModelProvider\nimport android.os.Bundle\nimport android.text.Editable\nimport android.text.TextWatcher\nimport androidx.fragment.app.Fragment\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport androidx.navigation.fragment.findNavController\nimport com.example.mypostsapp.AlertDialogUtils\nimport com.example.mypostsapp.MainActivity\nimport com.example.mypostsapp.R\nimport com.example.mypostsapp.databinding.ActivityMainBinding\nimport com.example.mypostsapp.databinding.FragmentMainBinding\n\nclass LoginFragment : Fragment() {\n\n    companion object {\n        fun newInstance() = LoginFragment()\n    }\n\n    private lateinit var binding: FragmentMainBinding\n    private lateinit var viewModel: LoginViewModel\n    private lateinit var loadingDialog: ProgressDialog\n\n    override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState)\n        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)\n    }\n\n    override fun onCreateView(\n        inflater: LayoutInflater, container: ViewGroup?,\n        savedInstanceState: Bundle?\n    ): View {\n        binding = FragmentMainBinding.inflate(layoutInflater)\n\n        return binding.root\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        loadingDialog = ProgressDialog(requireContext())\n        loadingDialog.setMessage(getString(R.string.please_wait))\n        viewModel.onError.observe(viewLifecycleOwner) {\n            loadingDialog.dismiss()\n            AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)\n        }\n        viewModel.onSignUpSuccess.observe(viewLifecycleOwner) {\n            loadingDialog.dismiss()\n            findNavController().navigate(R.id.login_navigation_to_create_fragment)\n        }\n\n        viewModel.onSignInSuccess.observe(viewLifecycleOwner) {\n            loadingDialog.dismiss()\n            startActivity(Intent(requireContext(), MainActivity::class.java))\n            activity?.finish()\n        }\n\n\n        binding.signUp.setOnClickListener {\n            if(isValidInput()) {\n                loadingDialog.show()\n                viewModel.onSignUpClicked(binding.emailText.text.toString(), binding.passwordText.text.toString())\n            }\n        }\n\n        binding.signIn.setOnClickListener {\n            if(isValidInput()) {\n                loadingDialog.show()\n                viewModel.onSignInClicked(binding.emailText.text.toString(), binding.passwordText.text.toString())\n            }\n\n        }\n\n        binding.emailText.addTextChangedListener(object : TextWatcher{\n            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n            }\n\n            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n                binding.emailError.visibility = View.GONE\n            }\n\n            override fun afterTextChanged(p0: Editable?) {\n            }\n        })\n\n        binding.passwordText.addTextChangedListener(object : TextWatcher{\n            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n            }\n\n            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n                binding.passError.visibility = View.GONE\n            }\n\n            override fun afterTextChanged(p0: Editable?) {\n            }\n        })\n\n    }\n\n    private fun isValidInput() : Boolean {\n        var  isValid = true\n        if (binding.emailText.text.toString().isNullOrEmpty()) {\n            binding.emailError.visibility = View.VISIBLE\n            isValid = false\n        }\n        if (binding.passwordText.text.toString().isNullOrEmpty()) {\n            binding.passError.visibility = View.VISIBLE\n            isValid = false\n        }\n\n        return isValid\n    }\n\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/ui/Login/LoginFragment.kt b/app/src/main/java/com/example/mypostsapp/ui/Login/LoginFragment.kt
+--- a/app/src/main/java/com/example/mypostsapp/ui/Login/LoginFragment.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/ui/Login/LoginFragment.kt	(date 1710791112424)
+@@ -14,8 +14,8 @@
+ import com.example.mypostsapp.AlertDialogUtils
+ import com.example.mypostsapp.MainActivity
+ import com.example.mypostsapp.R
+-import com.example.mypostsapp.databinding.ActivityMainBinding
+ import com.example.mypostsapp.databinding.FragmentMainBinding
++import com.example.mypostsapp.ui.Login.LoginViewModel
+ 
+ class LoginFragment : Fragment() {
+ 
+Index: app/src/main/java/com/example/mypostsapp/entities/Post.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp.entities\n\nimport java.io.Serializable\n\ndata class Post(var uid: String?=null, var description: String? = null,\n                var image: String ?= null,\n                var createdUser: User ?= null, var likeUserIds: List<String> ?= arrayListOf(), var created: Long ?= null ): Serializable {\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/entities/Post.kt b/app/src/main/java/com/example/mypostsapp/entities/Post.kt
+--- a/app/src/main/java/com/example/mypostsapp/entities/Post.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/entities/Post.kt	(date 1710774416616)
+@@ -1,8 +1,22 @@
+ package com.example.mypostsapp.entities
+ 
++import androidx.room.Entity
++import androidx.room.PrimaryKey
++import androidx.room.TypeConverters
++
++import com.example.mypostsapp.room.PostLocationConverter
++import com.example.mypostsapp.room.StringsConverter
++import com.example.mypostsapp.room.UssrConverter
+ import java.io.Serializable
+ 
+-data class Post(var uid: String?=null, var description: String? = null,
+-                var image: String ?= null,
+-                var createdUser: User ?= null, var likeUserIds: List<String> ?= arrayListOf(), var created: Long ?= null ): Serializable {
+-}
++@Entity(tableName = "posts")
++data class Post(
++
++    @PrimaryKey var uid: String = "",
++    var description: String? = null,
++    var image: String? = null,
++    @TypeConverters(UssrConverter::class) var createdUser: User? = null,
++    @TypeConverters(StringsConverter::class)  var likeUserIds: ArrayList<String>? = arrayListOf(),
++    var created: Long? = null,
++    @TypeConverters(PostLocationConverter::class) var location: PostLocation? = null
++) : Serializable
+Index: app/src/main/java/com/example/mypostsapp/LoginActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport androidx.appcompat.app.AppCompatActivity\nimport android.os.Bundle\nimport androidx.navigation.fragment.NavHostFragment\nimport androidx.navigation.ui.AppBarConfiguration\nimport androidx.navigation.ui.setupActionBarWithNavController\nimport com.example.mypostsapp.databinding.LoginActiviyLayoutBinding\n\nclass LoginActivity : AppCompatActivity() {\n\n    private lateinit var binding: LoginActiviyLayoutBinding\n    private val navController by lazy {\n        val navHostFragment = supportFragmentManager\n            .findFragmentById(R.id.nav_host_fragment_activity_bottem_navigation) as NavHostFragment\n\n        navHostFragment.navController\n    }\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        binding = LoginActiviyLayoutBinding.inflate(layoutInflater)\n        setContentView(binding.root)\n        val appBarConfiguration = AppBarConfiguration(setOf(R.id.login,\n            R.id.createProfile))\n        setupActionBarWithNavController(navController, appBarConfiguration)\n\n    }\n\n    override fun onSupportNavigateUp(): Boolean {\n        return super.onSupportNavigateUp()\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/LoginActivity.kt b/app/src/main/java/com/example/mypostsapp/LoginActivity.kt
+--- a/app/src/main/java/com/example/mypostsapp/LoginActivity.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/LoginActivity.kt	(date 1710778921400)
+@@ -25,8 +25,4 @@
+         setupActionBarWithNavController(navController, appBarConfiguration)
+ 
+     }
+-
+-    override fun onSupportNavigateUp(): Boolean {
+-        return super.onSupportNavigateUp()
+-    }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt b/app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt
+new file mode 100644
+--- /dev/null	(date 1710774392718)
++++ b/app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt	(date 1710774392718)
+@@ -0,0 +1,14 @@
++package com.example.mypostsapp.room
++
++import androidx.room.Database
++import androidx.room.RoomDatabase
++import androidx.room.TypeConverters
++import com.example.mypostsapp.entities.Post
++import com.example.mypostsapp.entities.User
++
++@Database(entities = [User::class, Post::class], version = 1)
++@TypeConverters(PostLocationConverter::class, PostListConverter::class, UssrConverter::class, StringsConverter::class)
++abstract class AppDatabase : RoomDatabase() {
++    abstract fun userDao(): UserDao
++    abstract fun postDao(): PostDao
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt b/app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt
+new file mode 100644
+--- /dev/null	(date 1710773667194)
++++ b/app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt	(date 1710773667194)
+@@ -0,0 +1,17 @@
++package com.example.mypostsapp.room
++
++import androidx.room.TypeConverter
++import com.example.mypostsapp.entities.User
++import com.google.gson.Gson
++
++class UssrConverter {
++    @TypeConverter
++    fun fromUser(user: User?): String? {
++        return user?.let { Gson().toJson(it) }
++    }
++
++    @TypeConverter
++    fun toUser(data: String?): User? {
++        return data?.let { Gson().fromJson(it, User::class.java) }
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport android.os.Bundle\nimport com.google.android.material.bottomnavigation.BottomNavigationView\nimport androidx.appcompat.app.AppCompatActivity\nimport androidx.navigation.findNavController\nimport androidx.navigation.ui.AppBarConfiguration\nimport androidx.navigation.ui.setupActionBarWithNavController\nimport androidx.navigation.ui.setupWithNavController\nimport com.example.mypostsapp.databinding.ActivityMainBinding\nimport com.example.mypostsapp.entities.User\n\nclass MainActivity : AppCompatActivity() {\n\n    private lateinit var binding: ActivityMainBinding\n\n    var currentUser : User?= null\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n\n        binding = ActivityMainBinding.inflate(layoutInflater)\n        setContentView(binding.root)\n\n        val navView: BottomNavigationView = binding.navView\n\n        val navController = findNavController(R.id.nav_host_fragment_activity_main)\n\n        val appBarConfiguration = AppBarConfiguration(\n            setOf(\n                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications\n            )\n        )\n        setupActionBarWithNavController(navController, appBarConfiguration)\n        navView.setupWithNavController(navController)\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/MainActivity.kt b/app/src/main/java/com/example/mypostsapp/MainActivity.kt
+--- a/app/src/main/java/com/example/mypostsapp/MainActivity.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/MainActivity.kt	(date 1710791112417)
+@@ -14,8 +14,6 @@
+ 
+     private lateinit var binding: ActivityMainBinding
+ 
+-    var currentUser : User?= null
+-
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+ 
+@@ -28,7 +26,7 @@
+ 
+         val appBarConfiguration = AppBarConfiguration(
+             setOf(
+-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
++                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_profile
+             )
+         )
+         setupActionBarWithNavController(navController, appBarConfiguration)
+Index: app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport android.graphics.Bitmap\nimport android.net.Uri\nimport android.util.Log\nimport androidx.lifecycle.MutableLiveData\nimport androidx.lifecycle.ViewModel\nimport com.example.mypostsapp.entities.User\nimport com.google.firebase.auth.FirebaseAuth\nimport com.google.firebase.storage.FirebaseStorage\nimport com.google.firebase.storage.StorageReference\nimport com.google.firebase.storage.UploadTask\nimport java.io.ByteArrayOutputStream\n\nclass CreateProfileViewModel : ViewModel() {\n\n    private val storage: FirebaseStorage = FirebaseStorage.getInstance()\n    val createSuccess : MutableLiveData<Unit> = MutableLiveData()\n    val onError : MutableLiveData<String> = MutableLiveData()\n    val currentUser: MutableLiveData<User> = MutableLiveData()\n\n\n    init {\n        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) {\n            if (it.isSuccessful) {\n                currentUser.value = it.result.toObject(User::class.java)\n                currentUser.postValue(currentUser.value)\n            }\n\n        }\n    }\n    fun createProfile(uid: String, fullName: String, imageBitmap: Bitmap?) {\n\n        imageBitmap?.let {\n            // the image name should be the user uuid - uniqe\n            val imageRef: StorageReference = storage.reference.child(\"images/\" + String + \".jpg\")\n            val baos = ByteArrayOutputStream()\n            imageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)\n            val imageData = baos.toByteArray()\n            // Upload file to Firebase Storage\n            // Upload file to Firebase Storage\n            val uploadTask = imageRef.putBytes(imageData)\n            uploadTask.addOnSuccessListener { taskSnapshot: UploadTask.TaskSnapshot? ->\n                imageRef.downloadUrl.addOnSuccessListener { uri: Uri ->\n                    saveUser(uid, fullName, uri.toString())\n                }\n            }.addOnFailureListener { e: Exception ->\n                // Handle failed upload\n                Log.e(\"TAG\", \"Upload failed: \" + e.message)\n            }\n        } ?: run {\n            saveUser(uid, fullName, currentUser.value?.image)\n        }\n\n    }\n\n    private fun saveUser(uid: String, fullName: String, image: String?) {\n        val user = User(uid, fullName, FirebaseAuth.getInstance().currentUser?.email, image)\n        DataBaseManager.createUser(user) {\n            if (it.isSuccessful) {\n                createSuccess.postValue(Unit)\n            } else{\n                onError.postValue(it.exception?.message ?: \"\")\n            }\n        }\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt b/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt
+--- a/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt	(date 1710779230573)
+@@ -5,11 +5,15 @@
+ import android.util.Log
+ import androidx.lifecycle.MutableLiveData
+ import androidx.lifecycle.ViewModel
++import androidx.lifecycle.viewModelScope
+ import com.example.mypostsapp.entities.User
++import com.example.mypostsapp.room.RoomManager
+ import com.google.firebase.auth.FirebaseAuth
+ import com.google.firebase.storage.FirebaseStorage
+ import com.google.firebase.storage.StorageReference
+ import com.google.firebase.storage.UploadTask
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.launch
+ import java.io.ByteArrayOutputStream
+ 
+ class CreateProfileViewModel : ViewModel() {
+@@ -21,10 +25,24 @@
+ 
+ 
+     init {
+-        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) {
++        val uid = FirebaseAuth.getInstance().uid!!
++        viewModelScope.launch(Dispatchers.IO) {
++//            val user = RoomManager.database.userDao().getUserById(uid)
++//            user?.let {
++//                currentUser.value = it
++//                currentUser.postValue(currentUser.value)
++//            }
++
++        }
++        DataBaseManager.getCurrentUser(uid) {
+             if (it.isSuccessful) {
+                 currentUser.value = it.result.toObject(User::class.java)
+                 currentUser.postValue(currentUser.value)
++                viewModelScope.launch(Dispatchers.IO) {
++                    currentUser.value?.let { user->
++                        RoomManager.database.userDao().insertUser(user)
++                    }
++                }
+             }
+ 
+         }
+Index: app/src/main/java/com/example/mypostsapp/MyApp.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/MyApp.kt b/app/src/main/java/com/example/mypostsapp/MyApp.kt
+new file mode 100644
+--- /dev/null	(date 1710715623280)
++++ b/app/src/main/java/com/example/mypostsapp/MyApp.kt	(date 1710715623280)
+@@ -0,0 +1,13 @@
++package com.example.mypostsapp
++
++import android.app.Application
++import com.example.mypostsapp.room.RoomManager
++
++class MyApp : Application() {
++
++
++    override fun onCreate() {
++        super.onCreate()
++        RoomManager.initManager(this)
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport android.app.Activity\nimport android.app.ProgressDialog\nimport android.content.Intent\nimport android.graphics.Bitmap\nimport android.os.Bundle\nimport android.provider.MediaStore\nimport android.text.Editable\nimport android.text.TextWatcher\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport androidx.activity.result.ActivityResult\nimport androidx.activity.result.contract.ActivityResultContracts\nimport androidx.fragment.app.Fragment\nimport androidx.lifecycle.ViewModelProvider\nimport com.bumptech.glide.Glide\nimport com.example.mypostsapp.databinding.FragmentCreateProfileBinding\nimport com.example.mypostsapp.entities.User\nimport com.example.mypostsapp.ui.main.LoginViewModel\nimport com.google.firebase.auth.FirebaseAuth\n\nclass CreateProfileFragment : Fragment() {\n\n    lateinit var binding: FragmentCreateProfileBinding\n    private var  imageBitmap : Bitmap?= null\n    private lateinit var loadingDialog: ProgressDialog\n\n    companion object {\n        fun newInstance() = CreateProfileFragment()\n    }\n\n    private lateinit var viewModel: CreateProfileViewModel\n\n    private val cameraActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(\n        ActivityResultContracts.StartActivityForResult()\n    ) { result: ActivityResult ->\n        if (result.resultCode == Activity.RESULT_OK) {\n            val photo = (result.data!!.extras!![\"data\"] as Bitmap?)!!\n            imageBitmap = photo\n            binding.imageView.setImageBitmap(photo)\n        }\n    }\n\n    private val galleryActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(\n        ActivityResultContracts.StartActivityForResult()\n    ) { result: ActivityResult ->\n        if (result.resultCode == Activity.RESULT_OK) {\n            try {\n                val uri = result.data?.data\n                val bitmap = MediaStore.Images.Media.getBitmap(this.context?.contentResolver, uri)\n                imageBitmap = bitmap\n                binding.imageView.setImageBitmap(bitmap)\n            } catch (e: Exception) {\n            }\n        }\n    }\n\n    override fun onCreateView(\n        inflater: LayoutInflater, container: ViewGroup?,\n        savedInstanceState: Bundle?\n    ): View {\n        binding = FragmentCreateProfileBinding.inflate(inflater)\n        return binding.root\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        viewModel = ViewModelProvider(this).get(CreateProfileViewModel::class.java)\n        viewModel.onError.observe(viewLifecycleOwner) {\n            loadingDialog.dismiss()\n            AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)\n        }\n\n        viewModel.createSuccess.observe(viewLifecycleOwner) {\n            loadingDialog.dismiss()\n            startActivity(Intent(requireContext(), MainActivity::class.java))\n        }\n        viewModel.currentUser.observe(viewLifecycleOwner) {\n            initializeScreenWithUser(it)\n        }\n        loadingDialog = ProgressDialog(requireContext())\n        loadingDialog.setMessage(getString(R.string.please_wait))\n\n\n        binding.emailET.setText(FirebaseAuth.getInstance().currentUser?.email.toString())\n        binding.fullNameET.addTextChangedListener(object : TextWatcher{\n            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n            }\n\n            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n                binding.errorName.visibility = View.GONE;\n            }\n\n            override fun afterTextChanged(p0: Editable?) {\n            }\n        })\n\n        binding.addFromGallery.setOnClickListener { openGallery() }\n        binding.takePhoto.setOnClickListener { openCamera() }\n        binding.save.setOnClickListener {\n            loadingDialog.show()\n            viewModel.createProfile(FirebaseAuth.getInstance().uid ?: \"\", binding.fullNameET.text.toString(), imageBitmap)\n        }\n\n    }\n\n    private fun initializeScreenWithUser(user: User?) {\n        Glide.with(requireContext())\n            .load(user?.image)\n            .placeholder(R.drawable.baseline_person_24)\n            .into(binding.imageView)\n\n        binding.fullNameET.setText(user?.name)\n        binding.save.text = getString(R.string.update)\n    }\n\n    private fun openCamera() {\n        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)\n        cameraActivityResultLauncher.launch(takePictureIntent)\n    }\n\n    private fun openGallery() {\n        val intent = Intent()\n        intent.setType(\"image/*\")\n        intent.setAction(Intent.ACTION_GET_CONTENT)\n        galleryActivityResultLauncher.launch(intent)\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt b/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt
+--- a/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt	(date 1710791112421)
+@@ -18,7 +18,6 @@
+ import com.bumptech.glide.Glide
+ import com.example.mypostsapp.databinding.FragmentCreateProfileBinding
+ import com.example.mypostsapp.entities.User
+-import com.example.mypostsapp.ui.main.LoginViewModel
+ import com.google.firebase.auth.FirebaseAuth
+ 
+ class CreateProfileFragment : Fragment() {
+@@ -27,10 +26,6 @@
+     private var  imageBitmap : Bitmap?= null
+     private lateinit var loadingDialog: ProgressDialog
+ 
+-    companion object {
+-        fun newInstance() = CreateProfileFragment()
+-    }
+-
+     private lateinit var viewModel: CreateProfileViewModel
+ 
+     private val cameraActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(
+@@ -113,7 +108,6 @@
+             .into(binding.imageView)
+ 
+         binding.fullNameET.setText(user?.name)
+-        binding.save.text = getString(R.string.update)
+     }
+ 
+     private fun openCamera() {
+Index: app/src/main/java/com/example/mypostsapp/entities/PostLocation.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/entities/PostLocation.kt b/app/src/main/java/com/example/mypostsapp/entities/PostLocation.kt
+new file mode 100644
+--- /dev/null	(date 1710773971001)
++++ b/app/src/main/java/com/example/mypostsapp/entities/PostLocation.kt	(date 1710773971001)
+@@ -0,0 +1,10 @@
++package com.example.mypostsapp.entities
++
++import java.io.Serializable
++
++
++data class PostLocation(val latitude: Double = 0.0,
++                        val longitude: Double = 0.0,
++                        val address: String = ""): Serializable {}
++
++
+Index: app/src/main/java/com/example/mypostsapp/ui/Login/LoginViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp.ui.main\n\nimport androidx.lifecycle.MutableLiveData\nimport androidx.lifecycle.ViewModel\nimport com.google.firebase.auth.FirebaseAuth\n\n\nclass LoginViewModel : ViewModel() {\n\n    private val auth = FirebaseAuth.getInstance()\n    val onSignUpSuccess: MutableLiveData<Unit> = MutableLiveData()\n    val onSignInSuccess: MutableLiveData<Unit> = MutableLiveData()\n    val onError: MutableLiveData<String> = MutableLiveData()\n\n\n    init {\n        if (FirebaseAuth.getInstance().currentUser != null) {\n            onSignInSuccess.postValue(Unit)\n        }\n    }\n\n    fun onSignUpClicked(email: String, password: String) {\n        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->\n            if (task.isSuccessful) {\n                onSignUpSuccess.postValue(Unit)\n            }else {\n                onError.postValue(task.exception?.message)\n            }\n        }\n    }\n\n    fun onSignInClicked(email: String, password: String) {\n        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->\n            if (task.isSuccessful) {\n                onSignInSuccess.postValue(Unit)\n            }else {\n                onError.postValue(task.exception?.message ?: \"\")\n            }\n        }\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/ui/Login/LoginViewModel.kt b/app/src/main/java/com/example/mypostsapp/ui/Login/LoginViewModel.kt
+--- a/app/src/main/java/com/example/mypostsapp/ui/Login/LoginViewModel.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/ui/Login/LoginViewModel.kt	(date 1710791112413)
+@@ -1,4 +1,4 @@
+-package com.example.mypostsapp.ui.main
++package com.example.mypostsapp.ui.Login
+ 
+ import androidx.lifecycle.MutableLiveData
+ import androidx.lifecycle.ViewModel
+Index: app/src/main/java/com/example/mypostsapp/room/PostDao.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/PostDao.kt b/app/src/main/java/com/example/mypostsapp/room/PostDao.kt
+new file mode 100644
+--- /dev/null	(date 1710779116470)
++++ b/app/src/main/java/com/example/mypostsapp/room/PostDao.kt	(date 1710779116470)
+@@ -0,0 +1,25 @@
++package com.example.mypostsapp.room
++
++
++import androidx.room.Dao
++import androidx.room.Delete
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++
++import com.example.mypostsapp.entities.Post
++import com.example.mypostsapp.entities.User
++
++@Dao
++interface PostDao {
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++     suspend fun insertPost(post: Post)
++
++    @Query("SELECT * FROM posts")
++    fun getAll(): List<Post>
++
++    @Delete
++    suspend fun deletePost(post: Post)
++
++    // Add other methods for CRUD operations
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/RoomManager.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/RoomManager.kt b/app/src/main/java/com/example/mypostsapp/room/RoomManager.kt
+new file mode 100644
+--- /dev/null	(date 1710773423122)
++++ b/app/src/main/java/com/example/mypostsapp/room/RoomManager.kt	(date 1710773423122)
+@@ -0,0 +1,17 @@
++package com.example.mypostsapp.room
++
++import android.content.Context
++import androidx.room.Room
++
++object RoomManager {
++    lateinit var database: AppDatabase
++
++    fun initManager(applicationContext: Context) {
++        database = Room.databaseBuilder(
++            applicationContext,
++            AppDatabase::class.java,
++            "my_database"
++        ).build()
++
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdatePostFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp.ui.main\n\nimport android.app.Activity\nimport android.app.ProgressDialog\nimport android.content.Intent\nimport android.graphics.Bitmap\nimport androidx.lifecycle.ViewModelProvider\nimport android.os.Bundle\nimport android.provider.MediaStore\nimport android.text.Editable\nimport android.text.TextWatcher\nimport androidx.fragment.app.Fragment\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport androidx.activity.result.ActivityResult\nimport androidx.activity.result.contract.ActivityResultContracts\nimport com.bumptech.glide.Glide\nimport com.example.mypostsapp.AlertDialogUtils\nimport com.example.mypostsapp.R\nimport com.example.mypostsapp.databinding.CreateOrUpdatePostLayoutBinding\nimport com.example.mypostsapp.entities.Post\nimport com.example.mypostsapp.entities.PostData\nimport com.example.mypostsapp.entities.User\n\nclass CreateOrUpdatePostFragment : Fragment() {\n\n    private var loadingDialog: ProgressDialog ?= null\n    private var currentUser: User?= null\n    private var imageBitmap: Bitmap ?= null\n    private val cameraActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(\n        ActivityResultContracts.StartActivityForResult()\n    ) { result: ActivityResult ->\n        if (result.resultCode == Activity.RESULT_OK) {\n            val photo = (result.data!!.extras!![\"data\"] as Bitmap?)!!\n            imageBitmap = photo\n            binding.postImage.setImageBitmap(photo)\n        }\n    }\n\n    private val galleryActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(\n        ActivityResultContracts.StartActivityForResult()\n    ) { result: ActivityResult ->\n        if (result.resultCode == Activity.RESULT_OK) {\n            try {\n                val uri = result.data?.data\n                val bitmap = MediaStore.Images.Media.getBitmap(this.context?.contentResolver, uri)\n                imageBitmap = bitmap\n                binding.postImage.setImageBitmap(bitmap)\n            } catch (e: Exception) {\n            }\n        }\n    }\n\n    companion object {\n        fun newInstance(position: Int?, post: Post?, user: User?) : CreateOrUpdatePostFragment{\n            val bundle : Bundle = Bundle()\n            position?.let {\n                bundle.putInt(\"position\", it)\n            }\n            post?.let {\n                bundle.putSerializable(\"post\", it)\n            }\n            bundle.putSerializable(\"user\", user)\n            return CreateOrUpdatePostFragment().apply {\n                arguments = bundle\n            }\n        }\n    }\n\n    private var _binding: CreateOrUpdatePostLayoutBinding? = null\n    private val binding get() = _binding!!\n    private lateinit var viewModel: CreateOrUpdateViewModel\n    private var position : Int? = null\n    private var post: Post ?= null\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        viewModel = ViewModelProvider(this).get(CreateOrUpdateViewModel::class.java)\n        position = arguments?.getInt(\"position\", -1)\n        position = if (position == -1) null else position\n        post = arguments?.getSerializable(\"post\") as? Post\n        currentUser = arguments?.getSerializable(\"user\") as? User\n    }\n\n    override fun onCreateView(\n        inflater: LayoutInflater, container: ViewGroup?,\n        savedInstanceState: Bundle?\n    ): View {\n         _binding = CreateOrUpdatePostLayoutBinding.inflate(layoutInflater)\n        return binding.root\n\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        loadingDialog = ProgressDialog(requireContext())\n        loadingDialog?.setMessage(getString(R.string.please_wait))\n        viewModel.onSuccess.observe(viewLifecycleOwner) {\n            onSuccess(it)\n        }\n        viewModel.onError.observe(viewLifecycleOwner){\n            loadingDialog?.dismiss()\n            AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)\n        }\n\n        Glide.with(requireContext())\n            .load(currentUser?.image)\n            .placeholder(R.drawable.baseline_person_24)\n            .circleCrop()\n            .into(binding.profileImage)\n\n        binding.name.text = currentUser?.name\n        binding.camera.setOnClickListener { openCamera() }\n        binding.gallery.setOnClickListener { openGallery() }\n        post?.let {\n            Glide.with(this)\n                .load(it.image)\n                .circleCrop()\n                .into(binding.postImage)\n            binding.description.setText(it.description)\n        }\n\n        binding.save.setText(if (post == null) R.string.save else R.string.update)\n        binding.save.setOnClickListener { savePost() }\n        binding.description.addTextChangedListener(object : TextWatcher{\n            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}\n\n            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n                binding.title.visibility = if (p0?.length == 0) View.VISIBLE else View.GONE\n            }\n\n            override fun afterTextChanged(p0: Editable?) {\n            }\n        })\n        binding.title.visibility = if (binding.description.text?.length == 0) View.VISIBLE else View.GONE\n        binding.close.setOnClickListener{activity?.finish()}\n    }\n\n    private fun onSuccess(post: Post?) {\n        loadingDialog?.dismiss()\n        val intent = Intent()\n        intent.putExtra(\"post\", post)\n        intent.putExtra(\"position\", position)\n        activity?.setResult(Activity.RESULT_OK, intent)\n        activity?.finish()\n    }\n\n    private fun savePost() {\n        if (binding.description.text.toString().isNullOrEmpty()) {\n            binding.description.error = getString(R.string.please_enter_description)\n        } else {\n            loadingDialog?.show()\n            viewModel.savePost(post?.uid, position, currentUser, binding.description.text.toString(), imageBitmap)\n        }\n    }\n\n    override fun onDestroyView() {\n        super.onDestroyView()\n        _binding = null\n    }\n\n    private fun openCamera() {\n        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)\n        cameraActivityResultLauncher.launch(takePictureIntent)\n    }\n\n    private fun openGallery() {\n        val intent = Intent()\n        intent.setType(\"image/*\")\n        intent.setAction(Intent.ACTION_GET_CONTENT)\n        galleryActivityResultLauncher.launch(intent)\n    }\n\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdatePostFragment.kt b/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdatePostFragment.kt
+--- a/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdatePostFragment.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdatePostFragment.kt	(date 1710780581898)
+@@ -1,9 +1,13 @@
+ package com.example.mypostsapp.ui.main
+ 
++import android.Manifest
+ import android.app.Activity
+ import android.app.ProgressDialog
+ import android.content.Intent
++import android.content.pm.PackageManager
+ import android.graphics.Bitmap
++import android.location.Geocoder
++import android.location.Location
+ import androidx.lifecycle.ViewModelProvider
+ import android.os.Bundle
+ import android.provider.MediaStore
+@@ -15,19 +19,40 @@
+ import android.view.ViewGroup
+ import androidx.activity.result.ActivityResult
+ import androidx.activity.result.contract.ActivityResultContracts
++import androidx.core.app.ActivityCompat
+ import com.bumptech.glide.Glide
+ import com.example.mypostsapp.AlertDialogUtils
+ import com.example.mypostsapp.R
+ import com.example.mypostsapp.databinding.CreateOrUpdatePostLayoutBinding
+ import com.example.mypostsapp.entities.Post
+-import com.example.mypostsapp.entities.PostData
++import com.example.mypostsapp.entities.PostLocation
+ import com.example.mypostsapp.entities.User
++import com.google.android.gms.location.FusedLocationProviderClient
++import com.google.android.gms.location.LocationServices
++import com.google.android.gms.tasks.OnSuccessListener
++import java.util.Locale
+ 
+ class CreateOrUpdatePostFragment : Fragment() {
+ 
+-    private var loadingDialog: ProgressDialog ?= null
+-    private var currentUser: User?= null
+-    private var imageBitmap: Bitmap ?= null
++    private var myLocation: Location? = null
++    private var loadingDialog: ProgressDialog? = null
++    private var currentUser: User? = null
++    private var imageBitmap: Bitmap? = null
++    private var fusedLocationClient: FusedLocationProviderClient? = null
++
++    private val requestPermissionLauncher = registerForActivityResult(
++        ActivityResultContracts.RequestMultiplePermissions()
++    ) { permissions: Map<String, Boolean> ->
++        val isAllGranted = permissions.all { it.value }
++        if (isAllGranted) {
++            // All permissions are granted, you can perform your task here
++            findMyLocation()
++        } else {
++            // Some permissions are denied, handle the situation accordingly
++            // For example, show a message to the user
++        }
++    }
++
+     private val cameraActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(
+         ActivityResultContracts.StartActivityForResult()
+     ) { result: ActivityResult ->
+@@ -53,8 +78,8 @@
+     }
+ 
+     companion object {
+-        fun newInstance(position: Int?, post: Post?, user: User?) : CreateOrUpdatePostFragment{
+-            val bundle : Bundle = Bundle()
++        fun newInstance(position: Int?, post: Post?, user: User?): CreateOrUpdatePostFragment {
++            val bundle: Bundle = Bundle()
+             position?.let {
+                 bundle.putInt("position", it)
+             }
+@@ -71,9 +96,10 @@
+     private var _binding: CreateOrUpdatePostLayoutBinding? = null
+     private val binding get() = _binding!!
+     private lateinit var viewModel: CreateOrUpdateViewModel
+-    private var position : Int? = null
+-    private var post: Post ?= null
++    private var position: Int? = null
++    private var post: Post? = null
+ 
++
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         viewModel = ViewModelProvider(this).get(CreateOrUpdateViewModel::class.java)
+@@ -87,19 +113,21 @@
+         inflater: LayoutInflater, container: ViewGroup?,
+         savedInstanceState: Bundle?
+     ): View {
+-         _binding = CreateOrUpdatePostLayoutBinding.inflate(layoutInflater)
++        _binding = CreateOrUpdatePostLayoutBinding.inflate(layoutInflater)
+         return binding.root
+ 
+     }
+ 
+     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+         super.onViewCreated(view, savedInstanceState)
++        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
++        findMyLocationIfHasAccess()
+         loadingDialog = ProgressDialog(requireContext())
+         loadingDialog?.setMessage(getString(R.string.please_wait))
+         viewModel.onSuccess.observe(viewLifecycleOwner) {
+-            onSuccess(it)
++            onSuccess(it.first, it.second)
+         }
+-        viewModel.onError.observe(viewLifecycleOwner){
++        viewModel.onError.observe(viewLifecycleOwner) {
+             loadingDialog?.dismiss()
+             AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)
+         }
+@@ -123,7 +151,7 @@
+ 
+         binding.save.setText(if (post == null) R.string.save else R.string.update)
+         binding.save.setOnClickListener { savePost() }
+-        binding.description.addTextChangedListener(object : TextWatcher{
++        binding.description.addTextChangedListener(object : TextWatcher {
+             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+ 
+             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+@@ -134,14 +162,17 @@
+             }
+         })
+         binding.title.visibility = if (binding.description.text?.length == 0) View.VISIBLE else View.GONE
+-        binding.close.setOnClickListener{activity?.finish()}
++        binding.close.setOnClickListener { activity?.finish() }
+     }
+ 
+-    private fun onSuccess(post: Post?) {
++    private fun onSuccess(post: Post?, user: User?) {
+         loadingDialog?.dismiss()
+         val intent = Intent()
+         intent.putExtra("post", post)
+         intent.putExtra("position", position)
++        user?.let {
++            intent.putExtra("user", it)
++        }
+         activity?.setResult(Activity.RESULT_OK, intent)
+         activity?.finish()
+     }
+@@ -151,7 +182,20 @@
+             binding.description.error = getString(R.string.please_enter_description)
+         } else {
+             loadingDialog?.show()
+-            viewModel.savePost(post?.uid, position, currentUser, binding.description.text.toString(), imageBitmap)
++            var address: String? = ""
++            myLocation?.let {
++                val geocoder = Geocoder(requireContext(), Locale.getDefault())
++                try {
++                    address = geocoder.getFromLocation(it.latitude, it.longitude, 1)?.get(0)?.getAddressLine(0)
++                } catch (e: Exception) {
++                }
++            }
++            viewModel.savePost(post?.uid, position,
++                currentUser, binding.description.text.toString(),
++                imageBitmap, post?.likeUserIds, PostLocation(
++                    myLocation?.latitude ?: 0.0, myLocation?.longitude ?: 0.0,
++                    address ?: "")
++            )
+         }
+     }
+ 
+@@ -172,4 +216,33 @@
+         galleryActivityResultLauncher.launch(intent)
+     }
+ 
++    private fun findMyLocationIfHasAccess() {
++        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
++            != PackageManager.PERMISSION_GRANTED && (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
++                    != PackageManager.PERMISSION_GRANTED)
++        ) {
++            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
++            ActivityCompat.requestPermissions(
++                requireActivity(),
++                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
++                1
++            )
++        } else {
++            findMyLocation()
++        }
++    }
++
++    private fun findMyLocation() {
++        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
++            == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
++            == PackageManager.PERMISSION_GRANTED
++        ) {
++            fusedLocationClient?.lastLocation?.addOnSuccessListener(
++                requireActivity(),
++                OnSuccessListener<Location> { location -> // Got last known location. In some rare situations this can be null.
++                    myLocation = location
++                })
++        }
++    }
++
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdateViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp.ui.main\n\nimport android.graphics.Bitmap\nimport android.net.Uri\nimport android.util.Log\nimport androidx.lifecycle.MutableLiveData\nimport androidx.lifecycle.ViewModel\nimport com.example.mypostsapp.DataBaseManager\nimport com.example.mypostsapp.entities.Post\nimport com.example.mypostsapp.entities.PostData\nimport com.example.mypostsapp.entities.User\nimport com.google.firebase.storage.FirebaseStorage\nimport com.google.firebase.storage.StorageReference\nimport com.google.firebase.storage.UploadTask\nimport java.io.ByteArrayOutputStream\nimport java.util.UUID\n\nclass CreateOrUpdateViewModel : ViewModel() {\n\n    val onSuccess : MutableLiveData<Post> = MutableLiveData()\n    val onError : MutableLiveData<String> = MutableLiveData()\n\n    fun savePost(uid: String?, position: Int ?, currentUser: User?, description: String, imageBitmap: Bitmap?, likeUserIds: List<String> ?= null) {\n        imageBitmap?.let {\n            val imageRef: StorageReference = FirebaseStorage.getInstance().reference.child(\"images/\" + String + \".jpg\")\n            val baos = ByteArrayOutputStream()\n            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)\n            val imageData = baos.toByteArray()\n            // Upload file to Firebase Storage\n            // Upload file to Firebase Storage\n            val uploadTask = imageRef.putBytes(imageData)\n            uploadTask.addOnSuccessListener { taskSnapshot: UploadTask.TaskSnapshot? ->\n                imageRef.downloadUrl.addOnSuccessListener { uri: Uri ->\n                    savePostToDataBase(uid, position, currentUser, description, uri.toString(), likeUserIds)\n                }\n            }.addOnFailureListener { e: Exception ->\n                // Handle failed upload\n                Log.e(\"TAG\", \"Upload failed: \" + e.message)\n            }\n        } ?: run {\n            savePostToDataBase(uid, position, currentUser, description, null, likeUserIds)\n        }\n\n    }\n\n    private fun savePostToDataBase(uid: String?, position: Int?, user: User?, description: String, uri: String?, likeUserIds: List<String>?){\n        val _uid = uid ?: UUID.randomUUID().toString()\n        val postData = Post(_uid, description, uri, user, likeUserIds, System.currentTimeMillis())\n        position?.let {\n            user?.posts?.set(it, postData)\n        } ?: run {\n            user?.posts?.add(postData)\n        }\n        DataBaseManager.savePost(postData, user) {\n            if (it.isSuccessful) {\n                onSuccess.postValue(postData)\n            } else {\n                onError.postValue(it.exception?.message.toString())\n            }\n        }\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdateViewModel.kt b/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdateViewModel.kt
+--- a/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdateViewModel.kt	(revision efb06ae59fc9e4237cc33ba8c31d0e1ddf4fb58d)
++++ b/app/src/main/java/com/example/mypostsapp/ui/main/CreateOrUpdateViewModel.kt	(date 1710780581900)
+@@ -5,22 +5,34 @@
+ import android.util.Log
+ import androidx.lifecycle.MutableLiveData
+ import androidx.lifecycle.ViewModel
++import androidx.lifecycle.viewModelScope
+ import com.example.mypostsapp.DataBaseManager
++import com.example.mypostsapp.room.RoomManager
+ import com.example.mypostsapp.entities.Post
+-import com.example.mypostsapp.entities.PostData
++import com.example.mypostsapp.entities.PostLocation
+ import com.example.mypostsapp.entities.User
+ import com.google.firebase.storage.FirebaseStorage
+ import com.google.firebase.storage.StorageReference
+ import com.google.firebase.storage.UploadTask
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.launch
+ import java.io.ByteArrayOutputStream
+ import java.util.UUID
+ 
+ class CreateOrUpdateViewModel : ViewModel() {
+ 
+-    val onSuccess : MutableLiveData<Post> = MutableLiveData()
+-    val onError : MutableLiveData<String> = MutableLiveData()
++    val onSuccess: MutableLiveData<Pair<Post, User?>> = MutableLiveData()
++    val onError: MutableLiveData<String> = MutableLiveData()
+ 
+-    fun savePost(uid: String?, position: Int ?, currentUser: User?, description: String, imageBitmap: Bitmap?, likeUserIds: List<String> ?= null) {
++    fun savePost(
++        uid: String?,
++        position: Int?,
++        currentUser: User?,
++        description: String,
++        imageBitmap: Bitmap?,
++        likeUserIds: ArrayList<String>?,
++        location: PostLocation?
++    ) {
+         imageBitmap?.let {
+             val imageRef: StorageReference = FirebaseStorage.getInstance().reference.child("images/" + String + ".jpg")
+             val baos = ByteArrayOutputStream()
+@@ -31,32 +43,72 @@
+             val uploadTask = imageRef.putBytes(imageData)
+             uploadTask.addOnSuccessListener { taskSnapshot: UploadTask.TaskSnapshot? ->
+                 imageRef.downloadUrl.addOnSuccessListener { uri: Uri ->
+-                    savePostToDataBase(uid, position, currentUser, description, uri.toString(), likeUserIds)
++                    savePostToDataBase(uid, position, currentUser, description, uri.toString(), likeUserIds, location)
+                 }
+             }.addOnFailureListener { e: Exception ->
+                 // Handle failed upload
+                 Log.e("TAG", "Upload failed: " + e.message)
+             }
+         } ?: run {
+-            savePostToDataBase(uid, position, currentUser, description, null, likeUserIds)
++            savePostToDataBase(uid, position, currentUser, description, null, likeUserIds, location)
+         }
+ 
+     }
+ 
+-    private fun savePostToDataBase(uid: String?, position: Int?, user: User?, description: String, uri: String?, likeUserIds: List<String>?){
++    private fun savePostToDataBase(
++        uid: String?,
++        position: Int?,
++        user: User?,
++        description: String,
++        uri: String?,
++        likeUserIds: ArrayList<String>?,
++        location: PostLocation?
++    ) {
+         val _uid = uid ?: UUID.randomUUID().toString()
+-        val postData = Post(_uid, description, uri, user, likeUserIds, System.currentTimeMillis())
++        val postData =
++            Post(
++                _uid, description, uri, user?.copy(posts = arrayListOf()), likeUserIds,
++                System.currentTimeMillis(), location
++            )
+         position?.let {
+-            user?.posts?.set(it, postData)
++            user?.posts?.set(
++                it,
++                postData.copy(
++                    uid = postData.uid,
++                    description = postData.description,
++                    image = postData.image,
++                    null,
++                    null,
++                    created = postData.created,
++                    location = postData.location
++                )
++            )
+         } ?: run {
+-            user?.posts?.add(postData)
++            user?.posts?.add(
++                postData.copy(
++                    uid = postData.uid,
++                    description = postData.description,
++                    image = postData.image,
++                    null,
++                    null,
++                    created = postData.created,
++                    location = postData.location
++                )
++            )
+         }
++
+         DataBaseManager.savePost(postData, user) {
+             if (it.isSuccessful) {
+-                onSuccess.postValue(postData)
++                onSuccess.postValue(Pair(postData, user))
+             } else {
+                 onError.postValue(it.exception?.message.toString())
+             }
+         }
++
++        viewModelScope.launch(Dispatchers.IO) {
++            RoomManager.database.postDao().insertPost(postData)
++            user?.let { RoomManager.database.userDao().insertUser(user) }
++
++        }
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/UserDao.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/UserDao.kt b/app/src/main/java/com/example/mypostsapp/room/UserDao.kt
+new file mode 100644
+--- /dev/null	(date 1710779230570)
++++ b/app/src/main/java/com/example/mypostsapp/room/UserDao.kt	(date 1710779230570)
+@@ -0,0 +1,17 @@
++package com.example.mypostsapp.room
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++
++import com.example.mypostsapp.entities.User
++
++@Dao
++interface UserDao {
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertUser(user: User)
++
++    @Query("SELECT * FROM users WHERE uid = :id")
++    suspend fun getUserById(id: String): User?
++}
+Index: app/src/main/java/com/example/mypostsapp/room/PostLocationConverter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/PostLocationConverter.kt b/app/src/main/java/com/example/mypostsapp/room/PostLocationConverter.kt
+new file mode 100644
+--- /dev/null	(date 1710773423134)
++++ b/app/src/main/java/com/example/mypostsapp/room/PostLocationConverter.kt	(date 1710773423134)
+@@ -0,0 +1,21 @@
++package com.example.mypostsapp.room
++
++import androidx.room.TypeConverter
++
++import com.example.mypostsapp.entities.PostLocation
++import com.google.common.reflect.TypeToken
++import com.google.gson.Gson
++
++class PostLocationConverter {
++    @TypeConverter
++    fun fromList(location: PostLocation): String {
++        val gson = Gson()
++        return gson.toJson(location)
++    }
++
++    @TypeConverter
++    fun toList(data: String): PostLocation {
++        val locationType = object : TypeToken<PostLocation>() {}.type
++        return Gson().fromJson(data, locationType)
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt b/app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt
+new file mode 100644
+--- /dev/null	(date 1710779499302)
++++ b/app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt	(date 1710779499302)
+@@ -0,0 +1,23 @@
++package com.example.mypostsapp.room
++
++import androidx.room.TypeConverter
++import com.google.common.reflect.TypeToken
++import com.google.gson.Gson
++
++class StringsConverter {
++    @TypeConverter
++    fun fromList(list: ArrayList<String>?): String {
++        val gson = Gson()
++        return gson.toJson(list)
++    }
++
++    @TypeConverter
++    fun toList(data: String?): ArrayList<String>? {
++        val listType = object : TypeToken<ArrayList<String>>() {}.type
++         data?.let {
++            return Gson().fromJson(data, listType)
++        } ?: run {
++            return null
++         }
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/PostListConverter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/PostListConverter.kt b/app/src/main/java/com/example/mypostsapp/room/PostListConverter.kt
+new file mode 100644
+--- /dev/null	(date 1710773871343)
++++ b/app/src/main/java/com/example/mypostsapp/room/PostListConverter.kt	(date 1710773871343)
+@@ -0,0 +1,21 @@
++package com.example.mypostsapp.room
++
++import androidx.room.TypeConverter
++import com.example.mypostsapp.entities.Post
++import com.google.common.reflect.TypeToken
++import com.google.gson.Gson
++
++class PostListConverter {
++    @TypeConverter
++    fun fromPostsList(postList: ArrayList<Post>?): String? {
++        val gson = Gson()
++        return gson.toJson(postList)
++    }
++
++    @TypeConverter
++    fun toPostsList(postListString: String?): ArrayList<Post>? {
++        val gson = Gson()
++        val type = object : TypeToken<ArrayList<Post>>() {}.type
++        return gson.fromJson(postListString, type)
++    }
++}
+\ No newline at end of file

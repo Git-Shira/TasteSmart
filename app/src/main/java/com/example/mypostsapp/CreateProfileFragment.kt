@@ -2,6 +2,8 @@ package com.example.mypostsapp
 
 import android.app.Activity
 import android.app.ProgressDialog
+import android.content.DialogInterface
+import android.content.DialogInterface.OnClickListener
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -18,18 +20,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.mypostsapp.databinding.FragmentCreateProfileBinding
 import com.example.mypostsapp.entities.User
-import com.example.mypostsapp.ui.main.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 class CreateProfileFragment : Fragment() {
 
     lateinit var binding: FragmentCreateProfileBinding
-    private var  imageBitmap : Bitmap?= null
+    private var imageBitmap: Bitmap? = null
     private lateinit var loadingDialog: ProgressDialog
-
-    companion object {
-        fun newInstance() = CreateProfileFragment()
-    }
 
     private lateinit var viewModel: CreateProfileViewModel
 
@@ -85,7 +82,7 @@ class CreateProfileFragment : Fragment() {
 
 
         binding.emailET.setText(FirebaseAuth.getInstance().currentUser?.email.toString())
-        binding.fullNameET.addTextChangedListener(object : TextWatcher{
+        binding.fullNameET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -104,6 +101,19 @@ class CreateProfileFragment : Fragment() {
             viewModel.createProfile(FirebaseAuth.getInstance().uid ?: "", binding.fullNameET.text.toString(), imageBitmap)
         }
 
+        binding.signOut.setOnClickListener {
+            AlertDialogUtils.showAlertWithButtons(requireContext(), getString(R.string.alarm), getString(R.string.are_you_sure), { dialog, p1 ->
+                signOut()
+            }) { dialog, p1 ->
+                dialog.dismiss()
+            }
+        }
+    }
+
+    private fun signOut() {
+        viewModel.signOut()
+        startActivity(Intent(requireContext(), LoginActivity::class.java))
+        activity?.finish()
     }
 
     private fun initializeScreenWithUser(user: User?) {
@@ -114,6 +124,7 @@ class CreateProfileFragment : Fragment() {
 
         binding.fullNameET.setText(user?.name)
         binding.save.text = getString(R.string.update)
+        binding.signOut.visibility = View.VISIBLE
     }
 
     private fun openCamera() {
