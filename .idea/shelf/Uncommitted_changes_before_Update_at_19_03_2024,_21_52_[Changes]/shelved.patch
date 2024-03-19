@@ -1,0 +1,408 @@
+Index: app/src/main/java/com/example/mypostsapp/room/UserDao.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/UserDao.kt b/app/src/main/java/com/example/mypostsapp/room/UserDao.kt
+new file mode 100644
+--- /dev/null	(date 1710877850504)
++++ b/app/src/main/java/com/example/mypostsapp/room/UserDao.kt	(date 1710877850504)
+@@ -0,0 +1,17 @@
++package com.example.mypostsapp.room
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++
++import com.example.mypostsapp.entities.User
++
++@Dao
++interface UserDao {
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertUser(user: User)
++
++    @Query("SELECT * FROM users WHERE uid = :id")
++    suspend fun getUserById(id: String): User?
++}
+Index: app/src/main/java/com/example/mypostsapp/AlertDialogUtils.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport android.content.Context\nimport androidx.appcompat.app.AlertDialog\n\nclass AlertDialogUtils {\n\n    companion object {\n        fun showAlert(context: Context, title: String, message: String) {\n            AlertDialog.Builder(context)\n                .setMessage(message)\n                .setTitle(title)\n                .show()\n        }\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/AlertDialogUtils.kt b/app/src/main/java/com/example/mypostsapp/AlertDialogUtils.kt
+--- a/app/src/main/java/com/example/mypostsapp/AlertDialogUtils.kt	(revision 60bd896f736b3837777db5d754d27deb4020eda8)
++++ b/app/src/main/java/com/example/mypostsapp/AlertDialogUtils.kt	(date 1710877850479)
+@@ -1,6 +1,7 @@
+ package com.example.mypostsapp
+ 
+ import android.content.Context
++import android.content.DialogInterface
+ import androidx.appcompat.app.AlertDialog
+ 
+ class AlertDialogUtils {
+@@ -12,5 +13,19 @@
+                 .setTitle(title)
+                 .show()
+         }
++
++        fun showAlertWithButtons(context: Context, title: String, message: String,
++                      positiveListener: DialogInterface.OnClickListener, negativeListener: DialogInterface.OnClickListener) {
++            AlertDialog.Builder(context)
++                .setMessage(message)
++                .setTitle(title)
++                .setPositiveButton(R.string.yes) {dialog, x->
++                    positiveListener.onClick(dialog, x)
++                }
++                .setNegativeButton(R.string.cancel){dialog, x->
++                    negativeListener.onClick(dialog, x)
++                }
++                .show()
++        }
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/MyApp.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/MyApp.kt b/app/src/main/java/com/example/mypostsapp/MyApp.kt
+new file mode 100644
+--- /dev/null	(date 1710877850497)
++++ b/app/src/main/java/com/example/mypostsapp/MyApp.kt	(date 1710877850497)
+@@ -0,0 +1,13 @@
++package com.example.mypostsapp
++
++import android.app.Application
++import com.example.mypostsapp.room.RoomManager
++
++class MyApp : Application() {
++
++
++    override fun onCreate() {
++        super.onCreate()
++        RoomManager.initManager(this)
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/entities/Post.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp.entities\n\nimport java.io.Serializable\n\ndata class Post(var uid: String?=null, var description: String? = null,\n                var image: String ?= null,\n                var createdUser: User ?= null, var likeUserIds: List<String> ?= arrayListOf(), var created: Long ?= null ): Serializable {\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/entities/Post.kt b/app/src/main/java/com/example/mypostsapp/entities/Post.kt
+--- a/app/src/main/java/com/example/mypostsapp/entities/Post.kt	(revision 60bd896f736b3837777db5d754d27deb4020eda8)
++++ b/app/src/main/java/com/example/mypostsapp/entities/Post.kt	(date 1710877850482)
+@@ -1,8 +1,22 @@
+ package com.example.mypostsapp.entities
+ 
++import androidx.room.Entity
++import androidx.room.PrimaryKey
++import androidx.room.TypeConverters
++
++import com.example.mypostsapp.room.PostLocationConverter
++import com.example.mypostsapp.room.StringsConverter
++import com.example.mypostsapp.room.UssrConverter
+ import java.io.Serializable
+ 
+-data class Post(var uid: String?=null, var description: String? = null,
+-                var image: String ?= null,
+-                var createdUser: User ?= null, var likeUserIds: List<String> ?= arrayListOf(), var created: Long ?= null ): Serializable {
+-}
++@Entity(tableName = "posts")
++data class Post(
++
++    @PrimaryKey var uid: String = "",
++    var description: String? = null,
++    var image: String? = null,
++    @TypeConverters(UssrConverter::class) var createdUser: User? = null,
++    @TypeConverters(StringsConverter::class)  var likeUserIds: ArrayList<String>? = arrayListOf(),
++    var created: Long? = null,
++    @TypeConverters(PostLocationConverter::class) var location: PostLocation? = null
++) : Serializable
+Index: app/src/main/java/com/example/mypostsapp/room/RoomManager.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/RoomManager.kt b/app/src/main/java/com/example/mypostsapp/room/RoomManager.kt
+new file mode 100644
+--- /dev/null	(date 1710877850502)
++++ b/app/src/main/java/com/example/mypostsapp/room/RoomManager.kt	(date 1710877850502)
+@@ -0,0 +1,17 @@
++package com.example.mypostsapp.room
++
++import android.content.Context
++import androidx.room.Room
++
++object RoomManager {
++    lateinit var database: AppDatabase
++
++    fun initManager(applicationContext: Context) {
++        database = Room.databaseBuilder(
++            applicationContext,
++            AppDatabase::class.java,
++            "my_database"
++        ).build()
++
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport android.os.Bundle\nimport com.google.android.material.bottomnavigation.BottomNavigationView\nimport androidx.appcompat.app.AppCompatActivity\nimport androidx.navigation.findNavController\nimport androidx.navigation.ui.AppBarConfiguration\nimport androidx.navigation.ui.setupActionBarWithNavController\nimport androidx.navigation.ui.setupWithNavController\nimport com.example.mypostsapp.databinding.ActivityMainBinding\nimport com.example.mypostsapp.entities.User\n\nclass MainActivity : AppCompatActivity() {\n\n    private lateinit var binding: ActivityMainBinding\n\n    var currentUser : User?= null\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n\n        binding = ActivityMainBinding.inflate(layoutInflater)\n        setContentView(binding.root)\n\n        val navView: BottomNavigationView = binding.navView\n\n        val navController = findNavController(R.id.nav_host_fragment_activity_main)\n\n        val appBarConfiguration = AppBarConfiguration(\n            setOf(\n                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications\n            )\n        )\n        setupActionBarWithNavController(navController, appBarConfiguration)\n        navView.setupWithNavController(navController)\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/MainActivity.kt b/app/src/main/java/com/example/mypostsapp/MainActivity.kt
+--- a/app/src/main/java/com/example/mypostsapp/MainActivity.kt	(revision 60bd896f736b3837777db5d754d27deb4020eda8)
++++ b/app/src/main/java/com/example/mypostsapp/MainActivity.kt	(date 1710877850487)
+@@ -14,8 +14,6 @@
+ 
+     private lateinit var binding: ActivityMainBinding
+ 
+-    var currentUser : User?= null
+-
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+ 
+@@ -28,7 +26,7 @@
+ 
+         val appBarConfiguration = AppBarConfiguration(
+             setOf(
+-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
++                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_profile
+             )
+         )
+         setupActionBarWithNavController(navController, appBarConfiguration)
+Index: app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport android.graphics.Bitmap\nimport android.net.Uri\nimport android.util.Log\nimport androidx.lifecycle.MutableLiveData\nimport androidx.lifecycle.ViewModel\nimport com.example.mypostsapp.entities.User\nimport com.google.firebase.auth.FirebaseAuth\nimport com.google.firebase.storage.FirebaseStorage\nimport com.google.firebase.storage.StorageReference\nimport com.google.firebase.storage.UploadTask\nimport java.io.ByteArrayOutputStream\n\nclass CreateProfileViewModel : ViewModel() {\n\n    private val storage: FirebaseStorage = FirebaseStorage.getInstance()\n    val createSuccess : MutableLiveData<Unit> = MutableLiveData()\n    val onError : MutableLiveData<String> = MutableLiveData()\n    val currentUser: MutableLiveData<User> = MutableLiveData()\n\n\n    init {\n        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) {\n            if (it.isSuccessful) {\n                currentUser.value = it.result.toObject(User::class.java)\n                currentUser.postValue(currentUser.value)\n            }\n\n        }\n    }\n    fun createProfile(uid: String, fullName: String, imageBitmap: Bitmap?) {\n\n        imageBitmap?.let {\n            // the image name should be the user uuid - uniqe\n            val imageRef: StorageReference = storage.reference.child(\"images/\" + String + \".jpg\")\n            val baos = ByteArrayOutputStream()\n            imageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)\n            val imageData = baos.toByteArray()\n            // Upload file to Firebase Storage\n            // Upload file to Firebase Storage\n            val uploadTask = imageRef.putBytes(imageData)\n            uploadTask.addOnSuccessListener { taskSnapshot: UploadTask.TaskSnapshot? ->\n                imageRef.downloadUrl.addOnSuccessListener { uri: Uri ->\n                    saveUser(uid, fullName, uri.toString())\n                }\n            }.addOnFailureListener { e: Exception ->\n                // Handle failed upload\n                Log.e(\"TAG\", \"Upload failed: \" + e.message)\n            }\n        } ?: run {\n            saveUser(uid, fullName, currentUser.value?.image)\n        }\n\n    }\n\n    private fun saveUser(uid: String, fullName: String, image: String?) {\n        val user = User(uid, fullName, FirebaseAuth.getInstance().currentUser?.email, image)\n        DataBaseManager.createUser(user) {\n            if (it.isSuccessful) {\n                createSuccess.postValue(Unit)\n            } else{\n                onError.postValue(it.exception?.message ?: \"\")\n            }\n        }\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt b/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt
+--- a/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt	(revision 60bd896f736b3837777db5d754d27deb4020eda8)
++++ b/app/src/main/java/com/example/mypostsapp/CreateProfileViewModel.kt	(date 1710877850495)
+@@ -5,11 +5,15 @@
+ import android.util.Log
+ import androidx.lifecycle.MutableLiveData
+ import androidx.lifecycle.ViewModel
++import androidx.lifecycle.viewModelScope
+ import com.example.mypostsapp.entities.User
++import com.example.mypostsapp.room.RoomManager
+ import com.google.firebase.auth.FirebaseAuth
+ import com.google.firebase.storage.FirebaseStorage
+ import com.google.firebase.storage.StorageReference
+ import com.google.firebase.storage.UploadTask
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.launch
+ import java.io.ByteArrayOutputStream
+ 
+ class CreateProfileViewModel : ViewModel() {
+@@ -21,16 +25,21 @@
+ 
+ 
+     init {
+-        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) {
++        val uid = FirebaseAuth.getInstance().uid!!
++        DataBaseManager.getCurrentUser(uid) {
+             if (it.isSuccessful) {
+                 currentUser.value = it.result.toObject(User::class.java)
+                 currentUser.postValue(currentUser.value)
++                viewModelScope.launch(Dispatchers.IO) {
++                    currentUser.value?.let { user->
++                        RoomManager.database.userDao().insertUser(user)
++                    }
++                }
+             }
+-
+         }
+     }
++
+     fun createProfile(uid: String, fullName: String, imageBitmap: Bitmap?) {
+-
+         imageBitmap?.let {
+             // the image name should be the user uuid - uniqe
+             val imageRef: StorageReference = storage.reference.child("images/" + String + ".jpg")
+@@ -64,4 +73,8 @@
+             }
+         }
+     }
++
++    fun signOut() {
++        FirebaseAuth.getInstance().signOut()
++    }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mypostsapp\n\nimport android.app.Activity\nimport android.app.ProgressDialog\nimport android.content.Intent\nimport android.graphics.Bitmap\nimport android.os.Bundle\nimport android.provider.MediaStore\nimport android.text.Editable\nimport android.text.TextWatcher\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport androidx.activity.result.ActivityResult\nimport androidx.activity.result.contract.ActivityResultContracts\nimport androidx.fragment.app.Fragment\nimport androidx.lifecycle.ViewModelProvider\nimport com.bumptech.glide.Glide\nimport com.example.mypostsapp.databinding.FragmentCreateProfileBinding\nimport com.example.mypostsapp.entities.User\nimport com.example.mypostsapp.ui.main.LoginViewModel\nimport com.google.firebase.auth.FirebaseAuth\n\nclass CreateProfileFragment : Fragment() {\n\n    lateinit var binding: FragmentCreateProfileBinding\n    private var  imageBitmap : Bitmap?= null\n    private lateinit var loadingDialog: ProgressDialog\n\n    companion object {\n        fun newInstance() = CreateProfileFragment()\n    }\n\n    private lateinit var viewModel: CreateProfileViewModel\n\n    private val cameraActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(\n        ActivityResultContracts.StartActivityForResult()\n    ) { result: ActivityResult ->\n        if (result.resultCode == Activity.RESULT_OK) {\n            val photo = (result.data!!.extras!![\"data\"] as Bitmap?)!!\n            imageBitmap = photo\n            binding.imageView.setImageBitmap(photo)\n        }\n    }\n\n    private val galleryActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(\n        ActivityResultContracts.StartActivityForResult()\n    ) { result: ActivityResult ->\n        if (result.resultCode == Activity.RESULT_OK) {\n            try {\n                val uri = result.data?.data\n                val bitmap = MediaStore.Images.Media.getBitmap(this.context?.contentResolver, uri)\n                imageBitmap = bitmap\n                binding.imageView.setImageBitmap(bitmap)\n            } catch (e: Exception) {\n            }\n        }\n    }\n\n    override fun onCreateView(\n        inflater: LayoutInflater, container: ViewGroup?,\n        savedInstanceState: Bundle?\n    ): View {\n        binding = FragmentCreateProfileBinding.inflate(inflater)\n        return binding.root\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        viewModel = ViewModelProvider(this).get(CreateProfileViewModel::class.java)\n        viewModel.onError.observe(viewLifecycleOwner) {\n            loadingDialog.dismiss()\n            AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)\n        }\n\n        viewModel.createSuccess.observe(viewLifecycleOwner) {\n            loadingDialog.dismiss()\n            startActivity(Intent(requireContext(), MainActivity::class.java))\n        }\n        viewModel.currentUser.observe(viewLifecycleOwner) {\n            initializeScreenWithUser(it)\n        }\n        loadingDialog = ProgressDialog(requireContext())\n        loadingDialog.setMessage(getString(R.string.please_wait))\n\n\n        binding.emailET.setText(FirebaseAuth.getInstance().currentUser?.email.toString())\n        binding.fullNameET.addTextChangedListener(object : TextWatcher{\n            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n            }\n\n            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {\n                binding.errorName.visibility = View.GONE;\n            }\n\n            override fun afterTextChanged(p0: Editable?) {\n            }\n        })\n\n        binding.addFromGallery.setOnClickListener { openGallery() }\n        binding.takePhoto.setOnClickListener { openCamera() }\n        binding.save.setOnClickListener {\n            loadingDialog.show()\n            viewModel.createProfile(FirebaseAuth.getInstance().uid ?: \"\", binding.fullNameET.text.toString(), imageBitmap)\n        }\n\n    }\n\n    private fun initializeScreenWithUser(user: User?) {\n        Glide.with(requireContext())\n            .load(user?.image)\n            .placeholder(R.drawable.baseline_person_24)\n            .into(binding.imageView)\n\n        binding.fullNameET.setText(user?.name)\n        binding.save.text = getString(R.string.update)\n    }\n\n    private fun openCamera() {\n        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)\n        cameraActivityResultLauncher.launch(takePictureIntent)\n    }\n\n    private fun openGallery() {\n        val intent = Intent()\n        intent.setType(\"image/*\")\n        intent.setAction(Intent.ACTION_GET_CONTENT)\n        galleryActivityResultLauncher.launch(intent)\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt b/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt
+--- a/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt	(revision 60bd896f736b3837777db5d754d27deb4020eda8)
++++ b/app/src/main/java/com/example/mypostsapp/CreateProfileFragment.kt	(date 1710877850500)
+@@ -2,6 +2,8 @@
+ 
+ import android.app.Activity
+ import android.app.ProgressDialog
++import android.content.DialogInterface
++import android.content.DialogInterface.OnClickListener
+ import android.content.Intent
+ import android.graphics.Bitmap
+ import android.os.Bundle
+@@ -18,19 +20,14 @@
+ import com.bumptech.glide.Glide
+ import com.example.mypostsapp.databinding.FragmentCreateProfileBinding
+ import com.example.mypostsapp.entities.User
+-import com.example.mypostsapp.ui.main.LoginViewModel
+ import com.google.firebase.auth.FirebaseAuth
+ 
+ class CreateProfileFragment : Fragment() {
+ 
+     lateinit var binding: FragmentCreateProfileBinding
+-    private var  imageBitmap : Bitmap?= null
++    private var imageBitmap: Bitmap? = null
+     private lateinit var loadingDialog: ProgressDialog
+ 
+-    companion object {
+-        fun newInstance() = CreateProfileFragment()
+-    }
+-
+     private lateinit var viewModel: CreateProfileViewModel
+ 
+     private val cameraActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(
+@@ -85,7 +82,7 @@
+ 
+ 
+         binding.emailET.setText(FirebaseAuth.getInstance().currentUser?.email.toString())
+-        binding.fullNameET.addTextChangedListener(object : TextWatcher{
++        binding.fullNameET.addTextChangedListener(object : TextWatcher {
+             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+             }
+ 
+@@ -104,6 +101,19 @@
+             viewModel.createProfile(FirebaseAuth.getInstance().uid ?: "", binding.fullNameET.text.toString(), imageBitmap)
+         }
+ 
++        binding.signOut.setOnClickListener {
++            AlertDialogUtils.showAlertWithButtons(requireContext(), getString(R.string.alarm), getString(R.string.are_you_sure), { dialog, p1 ->
++                signOut()
++            }) { dialog, p1 ->
++                dialog.dismiss()
++            }
++        }
++    }
++
++    private fun signOut() {
++        viewModel.signOut()
++        startActivity(Intent(requireContext(), LoginActivity::class.java))
++        activity?.finish()
+     }
+ 
+     private fun initializeScreenWithUser(user: User?) {
+@@ -114,6 +124,7 @@
+ 
+         binding.fullNameET.setText(user?.name)
+         binding.save.text = getString(R.string.update)
++        binding.signOut.visibility = View.VISIBLE
+     }
+ 
+     private fun openCamera() {
+Index: app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt b/app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt
+new file mode 100644
+--- /dev/null	(date 1710877850485)
++++ b/app/src/main/java/com/example/mypostsapp/room/StringsConverter.kt	(date 1710877850485)
+@@ -0,0 +1,23 @@
++package com.example.mypostsapp.room
++
++import androidx.room.TypeConverter
++import com.google.common.reflect.TypeToken
++import com.google.gson.Gson
++
++class StringsConverter {
++    @TypeConverter
++    fun fromList(list: ArrayList<String>?): String {
++        val gson = Gson()
++        return gson.toJson(list)
++    }
++
++    @TypeConverter
++    fun toList(data: String?): ArrayList<String>? {
++        val listType = object : TypeToken<ArrayList<String>>() {}.type
++         data?.let {
++            return Gson().fromJson(data, listType)
++        } ?: run {
++            return null
++         }
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt b/app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt
+new file mode 100644
+--- /dev/null	(date 1710877850489)
++++ b/app/src/main/java/com/example/mypostsapp/room/AppDatabase.kt	(date 1710877850489)
+@@ -0,0 +1,14 @@
++package com.example.mypostsapp.room
++
++import androidx.room.Database
++import androidx.room.RoomDatabase
++import androidx.room.TypeConverters
++import com.example.mypostsapp.entities.Post
++import com.example.mypostsapp.entities.User
++
++@Database(entities = [User::class, Post::class], version = 1)
++@TypeConverters(PostLocationConverter::class, UssrConverter::class, StringsConverter::class)
++abstract class AppDatabase : RoomDatabase() {
++    abstract fun userDao(): UserDao
++    abstract fun postDao(): PostDao
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt b/app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt
+new file mode 100644
+--- /dev/null	(date 1710877850492)
++++ b/app/src/main/java/com/example/mypostsapp/room/UssrConverter.kt	(date 1710877850492)
+@@ -0,0 +1,17 @@
++package com.example.mypostsapp.room
++
++import androidx.room.TypeConverter
++import com.example.mypostsapp.entities.User
++import com.google.gson.Gson
++
++class UssrConverter {
++    @TypeConverter
++    fun fromUser(user: User?): String? {
++        return user?.let { Gson().toJson(it) }
++    }
++
++    @TypeConverter
++    fun toUser(data: String?): User? {
++        return data?.let { Gson().fromJson(it, User::class.java) }
++    }
++}
+\ No newline at end of file
