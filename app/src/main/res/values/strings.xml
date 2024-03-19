@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">My Posts App</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="password">Enter you password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="please_enter_email">Please enter an email</string>
+    <string name="please_enter_full_name">Please enter your full name</string>
+    <string name="error">Error!</string>
+    <string name="please_wait">Please wait...</string>
+    <string name="save">Save</string>
+    <string name="full_name">Full Name</string>
+    <string name="add_from_gallery">Add From Gallery</string>
+    <string name="take_a_photo">Take A Photo</string>
+    <string name="please_enter_pass">Please enter your password</string>
+    <string name="map">Map</string>
+    <string name="profile">Profile</string>
+    <string name="what_is_on_your_mind">What\'s on your mind?</string>
+    <string name="create_post">Create Post</string>
+    <string name="update">Update</string>
+    <string name="please_enter_description">Please enter description</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="yes">Yes</string>
+    <string name="cancel">Cancel</string>
+    <string name="alarm">Alarm!</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="show_my_post">Show My Posts Only</string>
+    <string name="my_Location">My Location</string>
+</resources>
