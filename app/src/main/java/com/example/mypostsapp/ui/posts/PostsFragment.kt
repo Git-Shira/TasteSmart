@@ -73,17 +73,13 @@ class PostsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        postsViewModel =
-            ViewModelProvider(this).get(PostsViewModel::class.java)
-
+        postsViewModel = ViewModelProvider(this).get(PostsViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-        binding.list.layoutManager  = LinearLayoutManager(requireContext())
-        return root
+        return binding.root
     }
 
-    private fun updateTopBanner(user: User) {
-        user.let {
+    private fun updateTopBanner(user: User?) {
+        user?.let {
             Glide.with(requireContext())
                 .load(it.image)
                 .placeholder(R.drawable.baseline_person_24)
@@ -95,17 +91,25 @@ class PostsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        postsViewModel?.posts?.observe(viewLifecycleOwner) {
+        postsViewModel?.postsLD?.observe(viewLifecycleOwner) {
             adapter.setItems(it)
         }
 
-        postsViewModel?.currentUser?.observe(viewLifecycleOwner) {
+        postsViewModel?.userLD?.observe(viewLifecycleOwner) {
             updateTopBanner(it)
         }
 
         binding.list.adapter = adapter
 
         binding.title.setOnClickListener { openCreatePostActivity() }
+
+        binding.switchButton.setOnCheckedChangeListener{view, isChecked ->
+            if (isChecked) {
+                postsViewModel?.showMyPostOnly()
+            } else {
+                postsViewModel?.showAllPosts()
+            }
+        }
     }
 
     private fun openCreatePostActivity() {
@@ -122,11 +126,11 @@ class PostsFragment : Fragment() {
             intent.putExtra("user",  it)
         }
         intent.putExtra("position", position)
-        intent.putExtra("post", postsViewModel?.posts?.value?.get(position))
+        intent.putExtra("post", postsViewModel?.postsLD?.value?.get(position))
         updatePostLauncher.launch(intent)
     }
 
-    private fun getCurrentUser() : User? = postsViewModel?.currentUser?.value
+    private fun getCurrentUser() : User? = postsViewModel?.userLD?.value
 
 
     private fun deletePost(position: Int) {

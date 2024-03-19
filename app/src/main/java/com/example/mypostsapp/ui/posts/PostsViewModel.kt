@@ -1,6 +1,5 @@
 package com.example.mypostsapp.ui.posts
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,28 +13,28 @@ import kotlinx.coroutines.launch
 
 class PostsViewModel : ViewModel() {
 
-    private val _posts = ArrayList<Post>()
-    val posts: MutableLiveData<ArrayList<Post>> = MutableLiveData(_posts)
+    private val allPosts = ArrayList<Post>()
+    private val myPostsOnly = ArrayList<Post>()
+    private var relevantPosts = ArrayList<Post>()
 
-    private val _user = MutableLiveData<User>().apply {
-        value = User()
-    }
+    val postsLD: MutableLiveData<ArrayList<Post>> = MutableLiveData(allPosts)
 
-    val currentUser: LiveData<User> = _user
+    private var user : User ? = null
+    val userLD: MutableLiveData<User?> = MutableLiveData()
 
 
     init {
-        DataBaseManager.fetchPosts(viewModelScope, _posts) {
-            postList()
+        DataBaseManager.fetchPosts(viewModelScope, allPosts) {
+            publishPostsList(allPosts)
         }
 
-        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) {
+        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) { it ->
             if (it.isSuccessful) {
-                _user.value = it.result.toObject(User::class.java)
-                _user.postValue(_user.value)
+                user = it.result.toObject(User::class.java)
+                userLD.postValue(user)
                 viewModelScope.launch(Dispatchers.IO) {
-                    _user.value?.let {
-                        RoomManager.database.userDao().insertUser(it)
+                    user?.let { user->
+                        RoomManager.database.userDao().insertUser(user)
                     }
                 }
             }
@@ -43,62 +42,78 @@ class PostsViewModel : ViewModel() {
     }
 
     fun addPost(post: Post, user: User) {
-        _posts.add(0, post)
-        _user.value = user
-        posts.postValue(posts.value)
+        relevantPosts.add(0, post)
+        allPosts.add(0, post)
+        this.user = user
+        postsLD.postValue(postsLD.value)
     }
 
     fun updatePost(position: Int, post: Post, user: User) {
-        _posts.set(position, post)
-        _user.value = user
-        postList()
+        relevantPosts[position] = post
+        if (relevantPosts != allPosts) {
+           allPosts.forEachIndexed { index, currentPost ->
+                if (post.uid == currentPost.uid) {
+                    allPosts[index] = post
+                }
+            }
+
+        }
+        this.user = user
+        publishPostsList(relevantPosts)
     }
 
-    private fun postList() {
-        _posts.sortByDescending { it.created }
-        posts.postValue(posts.value)
+    private fun publishPostsList(postToPublish: ArrayList<Post>) {
+        postToPublish.sortByDescending { it.created }
+        relevantPosts = postToPublish
+        postsLD.postValue(relevantPosts)
         viewModelScope.launch(Dispatchers.IO) {
-            posts.value?.forEach {
+            postsLD.value?.forEach {
                 RoomManager.database.postDao().insertPost(it)
             }
         }
     }
 
     fun onLikeClicked(position: Int) {
-        val selectedPost = _posts[position]
+        val selectedPost = relevantPosts[position]
         selectedPost.likeUserIds?.firstOrNull {
-            currentUser.value?.uid == it
+            userLD.value?.uid == it
         }?.let {
             selectedPost.likeUserIds?.remove(it)
-            posts.postValue(_posts)
+            selectedPost.likeUserIds?.remove(it)
+            postsLD.postValue(relevantPosts)
         } ?: run {
-            selectedPost.likeUserIds?.add(currentUser.value?.uid!!) ?: run {
+            selectedPost.likeUserIds?.add(userLD.value?.uid!!) ?: run {
                 selectedPost.likeUserIds = arrayListOf()
-                selectedPost.likeUserIds?.add(currentUser.value?.uid!!)
+                selectedPost.likeUserIds?.add(userLD.value?.uid!!)
             }
-            posts.postValue(_posts)
+            postsLD.postValue(relevantPosts)
         }
 
         DataBaseManager.savePost(selectedPost)
     }
 
     fun onDeleteClicked(position: Int) {
-        val selectedPost = _posts[position]
-        currentUser.value?.posts?.firstOrNull { it.uid == selectedPost.uid }?.let {
-            currentUser.value?.posts?.remove(it)
-        }
-        _posts.remove(selectedPost)
-        posts.postValue(_posts)
-        DataBaseManager.deletePost(selectedPost, currentUser.value)
+        val selectedPost = relevantPosts[position]
+        allPosts.remove(selectedPost)
+        relevantPosts.remove(selectedPost)
+        postsLD.postValue(relevantPosts)
+        DataBaseManager.deletePost(selectedPost, userLD.value)
         viewModelScope.launch(Dispatchers.IO) {
             RoomManager.database.postDao().deletePost(selectedPost)
-            currentUser.value?.let {
+            userLD.value?.let {
                 RoomManager.database.userDao().insertUser(it)
             }
         }
+    }
 
+    fun showMyPostOnly() {
+        myPostsOnly.clear()
+        myPostsOnly.addAll(allPosts.filter { it.createdUser?.uid == FirebaseAuth.getInstance().uid })
+        publishPostsList(myPostsOnly)
+    }
 
-
+    fun showAllPosts() {
+        publishPostsList(allPosts)
 
     }
 

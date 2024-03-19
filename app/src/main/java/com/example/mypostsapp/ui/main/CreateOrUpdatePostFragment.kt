@@ -1,9 +1,13 @@
 package com.example.mypostsapp.ui.main
 
+import android.Manifest
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Geocoder
+import android.location.Location
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.provider.MediaStore
@@ -15,19 +19,37 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import com.bumptech.glide.Glide
 import com.example.mypostsapp.AlertDialogUtils
 import com.example.mypostsapp.R
 import com.example.mypostsapp.databinding.CreateOrUpdatePostLayoutBinding
 import com.example.mypostsapp.entities.Post
-import com.example.mypostsapp.entities.PostData
+import com.example.mypostsapp.entities.PostLocation
 import com.example.mypostsapp.entities.User
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.OnSuccessListener
+import java.util.Locale
 
 class CreateOrUpdatePostFragment : Fragment() {
 
-    private var loadingDialog: ProgressDialog ?= null
-    private var currentUser: User?= null
-    private var imageBitmap: Bitmap ?= null
+    private var myLocation: Location? = null
+    private var loadingDialog: ProgressDialog? = null
+    private var currentUser: User? = null
+    private var imageBitmap: Bitmap? = null
+    private var fusedLocationClient: FusedLocationProviderClient? = null
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions: Map<String, Boolean> ->
+        val isAllGranted = permissions.all { it.value }
+        if (isAllGranted) {
+            findMyLocation()
+        } else {
+        }
+    }
+
     private val cameraActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
@@ -53,8 +75,8 @@ class CreateOrUpdatePostFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(position: Int?, post: Post?, user: User?) : CreateOrUpdatePostFragment{
-            val bundle : Bundle = Bundle()
+        fun newInstance(position: Int?, post: Post?, user: User?): CreateOrUpdatePostFragment {
+            val bundle: Bundle = Bundle()
             position?.let {
                 bundle.putInt("position", it)
             }
@@ -71,8 +93,9 @@ class CreateOrUpdatePostFragment : Fragment() {
     private var _binding: CreateOrUpdatePostLayoutBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: CreateOrUpdateViewModel
-    private var position : Int? = null
-    private var post: Post ?= null
+    private var position: Int? = null
+    private var post: Post? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,19 +110,21 @@ class CreateOrUpdatePostFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-         _binding = CreateOrUpdatePostLayoutBinding.inflate(layoutInflater)
+        _binding = CreateOrUpdatePostLayoutBinding.inflate(layoutInflater)
         return binding.root
 
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        findMyLocationIfHasAccess()
         loadingDialog = ProgressDialog(requireContext())
         loadingDialog?.setMessage(getString(R.string.please_wait))
         viewModel.onSuccess.observe(viewLifecycleOwner) {
-            onSuccess(it)
+            onSuccess(it.first, it.second)
         }
-        viewModel.onError.observe(viewLifecycleOwner){
+        viewModel.onError.observe(viewLifecycleOwner) {
             loadingDialog?.dismiss()
             AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)
         }
@@ -123,7 +148,7 @@ class CreateOrUpdatePostFragment : Fragment() {
 
         binding.save.setText(if (post == null) R.string.save else R.string.update)
         binding.save.setOnClickListener { savePost() }
-        binding.description.addTextChangedListener(object : TextWatcher{
+        binding.description.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -134,14 +159,17 @@ class CreateOrUpdatePostFragment : Fragment() {
             }
         })
         binding.title.visibility = if (binding.description.text?.length == 0) View.VISIBLE else View.GONE
-        binding.close.setOnClickListener{activity?.finish()}
+        binding.close.setOnClickListener { activity?.finish() }
     }
 
-    private fun onSuccess(post: Post?) {
+    private fun onSuccess(post: Post?, user: User?) {
         loadingDialog?.dismiss()
         val intent = Intent()
         intent.putExtra("post", post)
         intent.putExtra("position", position)
+        user?.let {
+            intent.putExtra("user", it)
+        }
         activity?.setResult(Activity.RESULT_OK, intent)
         activity?.finish()
     }
@@ -151,7 +179,20 @@ class CreateOrUpdatePostFragment : Fragment() {
             binding.description.error = getString(R.string.please_enter_description)
         } else {
             loadingDialog?.show()
-            viewModel.savePost(post?.uid, position, currentUser, binding.description.text.toString(), imageBitmap)
+            var address: String? = ""
+            myLocation?.let {
+                val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                try {
+                    address = geocoder.getFromLocation(it.latitude, it.longitude, 1)?.get(0)?.getAddressLine(0)
+                } catch (e: Exception) {
+                }
+            }
+            viewModel.savePost(post?.uid, position,
+                currentUser, binding.description.text.toString(),
+                imageBitmap, post?.likeUserIds, PostLocation(
+                    myLocation?.latitude ?: 0.0, myLocation?.longitude ?: 0.0,
+                    address ?: "")
+            )
         }
     }
 
@@ -170,6 +211,35 @@ class CreateOrUpdatePostFragment : Fragment() {
         intent.setType("image/*")
         intent.setAction(Intent.ACTION_GET_CONTENT)
         galleryActivityResultLauncher.launch(intent)
+    }
+
+    private fun findMyLocationIfHasAccess() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED && (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED)
+        ) {
+            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                1
+            )
+        } else {
+            findMyLocation()
+        }
+    }
+
+    private fun findMyLocation() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient?.lastLocation?.addOnSuccessListener(
+                requireActivity(),
+                OnSuccessListener<Location> { location -> // Got last known location. In some rare situations this can be null.
+                    myLocation = location
+                })
+        }
     }
 
 }
