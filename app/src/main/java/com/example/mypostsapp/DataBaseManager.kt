@@ -64,7 +64,6 @@ class DataBaseManager {
                 .addOnCompleteListener{
                     listener.onComplete(it)
                 }
-
         }
 
         fun savePost(post: Post, user: User? = null, onComplete: OnCompleteListener<Void>? = null) {

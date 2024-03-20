@@ -30,6 +30,7 @@ import com.example.mypostsapp.entities.User
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.auth.FirebaseAuth
 import java.util.Locale
 
 class CreateOrUpdatePostFragment : Fragment() {
@@ -56,7 +57,7 @@ class CreateOrUpdatePostFragment : Fragment() {
         if (result.resultCode == Activity.RESULT_OK) {
             val photo = (result.data!!.extras!!["data"] as Bitmap?)!!
             imageBitmap = photo
-            binding.postImage.setImageBitmap(photo)
+            binding.postDataContainer.postImage.setImageBitmap(photo)
         }
     }
 
@@ -68,7 +69,7 @@ class CreateOrUpdatePostFragment : Fragment() {
                 val uri = result.data?.data
                 val bitmap = MediaStore.Images.Media.getBitmap(this.context?.contentResolver, uri)
                 imageBitmap = bitmap
-                binding.postImage.setImageBitmap(bitmap)
+                binding.postDataContainer.postImage.setImageBitmap(bitmap)
             } catch (e: Exception) {
             }
         }
@@ -133,33 +134,34 @@ class CreateOrUpdatePostFragment : Fragment() {
             .load(currentUser?.image)
             .placeholder(R.drawable.baseline_person_24)
             .circleCrop()
-            .into(binding.profileImage)
+            .into(binding.postDataContainer.profileImage)
 
-        binding.name.text = currentUser?.name
-        binding.camera.setOnClickListener { openCamera() }
-        binding.gallery.setOnClickListener { openGallery() }
+        binding.postDataContainer.name.text = currentUser?.name
+        binding.postDataContainer.camera.setOnClickListener { openCamera() }
+        binding.postDataContainer.gallery.setOnClickListener { openGallery() }
         post?.let {
             Glide.with(this)
                 .load(it.image)
                 .circleCrop()
-                .into(binding.postImage)
-            binding.description.setText(it.description)
+                .into(binding.postDataContainer.postImage)
+            binding.postDataContainer.description.setText(it.description)
         }
 
         binding.save.setText(if (post == null) R.string.save else R.string.update)
         binding.save.setOnClickListener { savePost() }
-        binding.description.addTextChangedListener(object : TextWatcher {
+        binding.postDataContainer.description.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                binding.title.visibility = if (p0?.length == 0) View.VISIBLE else View.GONE
+                binding.postDataContainer.title.visibility = if (p0?.length == 0) View.VISIBLE else View.GONE
             }
 
             override fun afterTextChanged(p0: Editable?) {
             }
         })
-        binding.title.visibility = if (binding.description.text?.length == 0) View.VISIBLE else View.GONE
+        binding.postDataContainer.title.visibility = if (binding.postDataContainer.description.text?.length == 0) View.VISIBLE else View.GONE
         binding.close.setOnClickListener { activity?.finish() }
+        binding.postDataContainer.email.setText(post?.createdUser?.email ?: FirebaseAuth.getInstance().currentUser?.email)
     }
 
     private fun onSuccess(post: Post?, user: User?) {
@@ -175,8 +177,8 @@ class CreateOrUpdatePostFragment : Fragment() {
     }
 
     private fun savePost() {
-        if (binding.description.text.toString().isNullOrEmpty()) {
-            binding.description.error = getString(R.string.please_enter_description)
+        if (binding.postDataContainer.description.text.toString().isNullOrEmpty()) {
+            binding.postDataContainer.description.error = getString(R.string.please_enter_description)
         } else {
             loadingDialog?.show()
             var address: String? = ""
@@ -188,7 +190,7 @@ class CreateOrUpdatePostFragment : Fragment() {
                 }
             }
             viewModel.savePost(post?.uid, position,
-                currentUser, binding.description.text.toString(),
+                currentUser, binding.postDataContainer.description.text.toString(),
                 imageBitmap, post?.likeUserIds, PostLocation(
                     myLocation?.latitude ?: 0.0, myLocation?.longitude ?: 0.0,
                     address ?: "")

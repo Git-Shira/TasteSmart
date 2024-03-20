@@ -14,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.mypostsapp.AlertDialogUtils
 import com.example.mypostsapp.MainActivity
 import com.example.mypostsapp.R
-import com.example.mypostsapp.databinding.FragmentMainBinding
+import com.example.mypostsapp.databinding.LoginFragmentBinding
 import com.example.mypostsapp.ui.Login.LoginViewModel
 
 class LoginFragment : Fragment() {
@@ -23,7 +23,7 @@ class LoginFragment : Fragment() {
         fun newInstance() = LoginFragment()
     }
 
-    private lateinit var binding: FragmentMainBinding
+    private lateinit var binding: LoginFragmentBinding
     private lateinit var viewModel: LoginViewModel
     private lateinit var loadingDialog: ProgressDialog
 
@@ -35,7 +35,7 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentMainBinding.inflate(layoutInflater)
+        binding = LoginFragmentBinding.inflate(layoutInflater)
 
         return binding.root
     }
@@ -48,10 +48,6 @@ class LoginFragment : Fragment() {
             loadingDialog.dismiss()
             AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)
         }
-        viewModel.onSignUpSuccess.observe(viewLifecycleOwner) {
-            loadingDialog.dismiss()
-            findNavController().navigate(R.id.login_navigation_to_create_fragment)
-        }
 
         viewModel.onSignInSuccess.observe(viewLifecycleOwner) {
             loadingDialog.dismiss()
@@ -61,10 +57,7 @@ class LoginFragment : Fragment() {
 
 
         binding.signUp.setOnClickListener {
-            if(isValidInput()) {
-                loadingDialog.show()
-                viewModel.onSignUpClicked(binding.emailText.text.toString(), binding.passwordText.text.toString())
-            }
+            findNavController().navigate(R.id.login_navigation_to_create_fragment)
         }
 
         binding.signIn.setOnClickListener {

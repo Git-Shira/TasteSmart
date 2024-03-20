@@ -7,14 +7,14 @@
     <fragment
         android:id="@+id/login"
         android:name="com.example.mypostsapp.ui.main.LoginFragment"
-        tools:layout="@layout/fragment_main">
+        tools:layout="@layout/login_fragment">
         <action
             android:id="@+id/login_navigation_to_create_fragment"
             app:destination="@id/createProfile" />
     </fragment>
     <fragment
         android:id="@+id/createProfile"
-        android:name="com.example.mypostsapp.CreateProfileFragment"
+        android:name="com.example.mypostsapp.ui.createProfile.CreateOrUpdateProfileFragment"
         tools:layout="@layout/fragment_create_profile" >
         <action
             android:id="@+id/action_creteProfile_to_login"

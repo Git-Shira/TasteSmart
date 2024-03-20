@@ -8,6 +8,7 @@
     tools:context=".ui.posts.PostsFragment">
 
     <LinearLayout
+        android:id="@+id/add_post_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -28,29 +29,6 @@
             android:textSize="16dp"
             android:textStyle="bold"
             android:text="@string/what_is_on_your_mind"/>
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:background="@color/dark_grey"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/show_my_post"
-            android:textStyle="bold"
-            android:layout_marginEnd="16dp"/>
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switch_button"
-            android:checked="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <View

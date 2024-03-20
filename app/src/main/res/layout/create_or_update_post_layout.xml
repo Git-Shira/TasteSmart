@@ -43,70 +43,10 @@
         android:layout_height="4dp"
         android:background="@color/dark_grey"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp">
+    <include
+        android:id="@+id/post_data_container"
+        layout="@layout/post_data_layout"/>
 
-        <ImageView
-            android:id="@+id/profile_image"
-            android:layout_width="60dp"
-            android:layout_height="60dp"/>
-
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:padding="8dp"
-        android:background="@drawable/border"
-        android:layout_height="150dp">
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/what_is_on_your_mind"/>
-
-        <EditText
-            android:id="@+id/description"
-            android:layout_width="match_parent"
-            android:inputType="textMultiLine"
-            android:layout_height="wrap_content"
-            android:background="@null"/>
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/camera"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:src="@drawable/baseline_camera_alt_24"/>
-
-        <ImageView
-            android:id="@+id/gallery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:src="@drawable/baseline_attach_file_24"/>
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/post_image"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_marginTop="16dp"/>
 
 
 

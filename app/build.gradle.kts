@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id ("com.google.devtools.ksp")
+    id ("androidx.navigation.safeargs.kotlin")
     kotlin("kapt") // Add this line for Kotlin annotation processing
 }
 
@@ -57,8 +58,6 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.7.7")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.7.7")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation ("com.google.code.gson:gson:2.10.1")
     val roomVersion = "2.6.1" // Check for the latest version

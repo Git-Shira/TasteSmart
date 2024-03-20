@@ -15,35 +15,20 @@ class PostsViewModel : ViewModel() {
 
     private val allPosts = ArrayList<Post>()
     private val myPostsOnly = ArrayList<Post>()
+    private val likedOnly = ArrayList<Post>()
     private var relevantPosts = ArrayList<Post>()
+    private var type: PostsScreenType = PostsScreenType.ALL
 
     val postsLD: MutableLiveData<ArrayList<Post>> = MutableLiveData(allPosts)
 
     private var user : User ? = null
     val userLD: MutableLiveData<User?> = MutableLiveData()
 
-
-    init {
-        DataBaseManager.fetchPosts(viewModelScope, allPosts) {
-            publishPostsList(allPosts)
-        }
-
-        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) { it ->
-            if (it.isSuccessful) {
-                user = it.result.toObject(User::class.java)
-                userLD.postValue(user)
-                viewModelScope.launch(Dispatchers.IO) {
-                    user?.let { user->
-                        RoomManager.database.userDao().insertUser(user)
-                    }
-                }
-            }
-        }
-    }
-
     fun addPost(post: Post, user: User) {
-        relevantPosts.add(0, post)
         allPosts.add(0, post)
+        if (relevantPosts != allPosts) {
+            relevantPosts.add(0, post)
+        }
         this.user = user
         postsLD.postValue(postsLD.value)
     }
@@ -115,6 +100,43 @@ class PostsViewModel : ViewModel() {
     fun showAllPosts() {
         publishPostsList(allPosts)
 
+    }
+
+    fun setPostsType(postsScreenType: PostsScreenType?) {
+        this.type = postsScreenType ?: PostsScreenType.ALL
+    }
+
+    fun fetchPosts() {
+        DataBaseManager.fetchPosts(viewModelScope, allPosts) {
+            when (type) {
+                PostsScreenType.ALL -> {
+                    publishPostsList(allPosts)
+                }
+
+                PostsScreenType.MY_POSTS -> {
+                    myPostsOnly.clear()
+                    myPostsOnly.addAll(allPosts.filter { it.createdUser?.uid == FirebaseAuth.getInstance().uid })
+                    publishPostsList(myPostsOnly)
+                }
+                PostsScreenType.LIKED -> {
+                    likedOnly.clear()
+                    likedOnly.addAll(allPosts.filter { it.likeUserIds?.contains(FirebaseAuth.getInstance().uid) == true })
+                    publishPostsList(likedOnly)
+                }
+            }
+        }
+
+        DataBaseManager.getCurrentUser(FirebaseAuth.getInstance().uid!!) { it ->
+            if (it.isSuccessful) {
+                user = it.result.toObject(User::class.java)
+                userLD.postValue(user)
+                viewModelScope.launch(Dispatchers.IO) {
+                    user?.let { user->
+                        RoomManager.database.userDao().insertUser(user)
+                    }
+                }
+            }
+        }
     }
 
 
