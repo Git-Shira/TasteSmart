@@ -124,7 +124,7 @@ class CreateOrUpdateProfileFragment : Fragment() {
         binding.save.setOnClickListener {
             if (isValidInput()) {
                 loadingDialog.show()
-                viewModel.createOrUpdateProfile(FirebaseAuth.getInstance().uid ?: "", binding.emailET.text.toString(), binding.passwordET.text.toString(), binding.fullNameET.text.toString(), imageBitmap)
+                viewModel.createOrUpdateProfile( binding.emailET.text.toString(), binding.passwordET.text.toString(), binding.fullNameET.text.toString(), imageBitmap)
             }
         }
     }

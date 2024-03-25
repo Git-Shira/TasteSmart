@@ -22,7 +22,7 @@ class DataBaseManager {
         fun createUser(user: User, listener: OnCompleteListener<Void>) {
             FirebaseFirestore.getInstance()
                 .collection(USERS)
-                .document(user.uid!!)
+                .document(user.uid)
                 .set(user)
                 .addOnCompleteListener(listener)
         }

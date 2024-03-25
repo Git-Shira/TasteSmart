@@ -22,13 +22,13 @@ class CreateProfileViewModel : ViewModel() {
     private var currentUser : User ?= null
 
 
-    fun createOrUpdateProfile(uid: String, email: String, password: String?, fullName: String, imageBitmap: Bitmap?) {
+    fun createOrUpdateProfile(email: String, password: String?, fullName: String, imageBitmap: Bitmap?) {
         if (!password.isNullOrEmpty()) {
             createUserViaAuth(email, password){
-                saveUserOnDataBase(uid, email, fullName, imageBitmap)
+                saveUserOnDataBase(FirebaseAuth.getInstance().uid ?: "", email, fullName, imageBitmap)
             }
         } else {
-            saveUserOnDataBase(uid, email, fullName, imageBitmap)
+            saveUserOnDataBase(FirebaseAuth.getInstance().uid ?: "", email, fullName, imageBitmap)
         }
 
     }

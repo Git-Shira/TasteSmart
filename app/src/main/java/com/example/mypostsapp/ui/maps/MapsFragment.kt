@@ -41,13 +41,6 @@ class MapsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var fusedLocationClient: FusedLocationProviderClient? = null
-    private val requestPermissionLauncher = registerForActivityResult<String, Boolean>(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            findMyLocation()
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,14 +64,13 @@ class MapsFragment : Fragment() {
 
         mapFragment?.getMapAsync(OnMapReadyCallback { googleMap: GoogleMap ->
             mMap = googleMap
-            mMap?.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener{
-                override fun onMarkerClick(p0: Marker): Boolean {
-                    if (p0.tag != -1) {
-                        showPostByClick(p0.tag as? Int)
-                    }
-                    return p0.tag != -1
+            mMap?.uiSettings?.isZoomControlsEnabled = true
+            mMap?.setOnMarkerClickListener { p0 ->
+                if (p0.tag != -1) {
+                    showPostByClick(p0.tag as? Int)
                 }
-            })
+                p0.tag != -1
+            }
             mapViewModel?.postsLD?.observe(viewLifecycleOwner) {
                 it.forEachIndexed { index, post ->
                     markLocation(post, index)
