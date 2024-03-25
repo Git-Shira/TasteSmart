@@ -17,6 +17,25 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/action_container"
+            android:layout_width="match_parent"
+            android:gravity="end"
+            android:layout_marginStart="8dp"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/delete"
+                android:layout_width="wrap_content"
+                android:src="@drawable/baseline_delete_24"
+                android:layout_marginEnd="4dp"
+                android:layout_height="wrap_content"/>
+            <ImageView
+                android:id="@+id/edit"
+                android:src="@drawable/baseline_edit_24"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="4dp">
@@ -37,39 +56,25 @@
                     android:id="@+id/user_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textSize="18dp"
+                    android:textColor="@color/black"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold" />
+                    android:textSize="16dp"
+                    android:textColor="@color/black"/>
 
                 <TextView
                     android:id="@+id/location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textSize="12dp"
+                    android:ellipsize="end"
                     android:textStyle="bold" />
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/action_container"
-                android:layout_width="wrap_content"
-                android:gravity="center"
-                android:layout_marginStart="8dp"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/delete"
-                    android:layout_width="wrap_content"
-                    android:src="@drawable/baseline_delete_24"
-                    android:layout_marginEnd="4dp"
-                    android:layout_height="wrap_content"/>
-
-                <ImageView
-                    android:id="@+id/edit"
-                    android:src="@drawable/baseline_edit_24"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
             </LinearLayout>
         </LinearLayout>
 

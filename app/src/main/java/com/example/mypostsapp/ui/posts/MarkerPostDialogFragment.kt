@@ -12,7 +12,6 @@ import com.bumptech.glide.Glide
 import com.example.mypostsapp.R
 import com.example.mypostsapp.databinding.PostMarkerBinding
 import com.example.mypostsapp.entities.Post
-import com.google.firebase.auth.FirebaseAuth
 
 
 class MarkerPostDialogFragment : DialogFragment() {
@@ -48,6 +47,7 @@ class MarkerPostDialogFragment : DialogFragment() {
         binding.container.postImage.visibility = if (post.image != null) VISIBLE else GONE
         binding.location.text = post.location?.address
         binding.container.email.text = post.createdUser?.email
+        binding.container.description.isEnabled = false
 
         return binding.root
     }

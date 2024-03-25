@@ -14,13 +14,13 @@ class LoginActivity : AppCompatActivity() {
     private val navController by lazy {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_login_activity_navigation) as NavHostFragment
-
         navHostFragment.navController
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = LoginActiviyLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        supportActionBar?.hide()
         val appBarConfiguration = AppBarConfiguration(setOf(
             R.id.login,
             R.id.createProfile

@@ -189,9 +189,9 @@ class CreateOrUpdatePostFragment : Fragment() {
                 } catch (e: Exception) {
                 }
             }
-            viewModel.savePost(post?.uid, position,
+            viewModel.savePost(post?.uid,
                 currentUser, binding.postDataContainer.description.text.toString(),
-                imageBitmap, post?.likeUserIds, PostLocation(
+                imageBitmap, post?.image, post?.likeUserIds, PostLocation(
                     myLocation?.latitude ?: 0.0, myLocation?.longitude ?: 0.0,
                     address ?: "")
             )

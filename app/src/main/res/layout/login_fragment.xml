@@ -2,6 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/light_grey"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -13,7 +14,7 @@
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:src="@mipmap/ic_launcher_foreground"/>
+            android:src="@drawable/bg_icon"/>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
@@ -34,6 +35,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
                     android:textColor="?colorPrimary"
+                    android:background="@drawable/border"
                     android:textColorHint="?colorPrimary"
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -66,6 +68,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:textColor="?colorPrimary"
+                    android:background="@drawable/border"
                     android:textColorHint="?colorPrimary"
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -77,18 +80,6 @@
                 android:text="@string/please_enter_pass"
                 android:textColor="@color/red"
                 android:visibility="gone" />
-
-<!--            <androidx.appcompat.widget.AppCompatTextView-->
-<!--                android:id="@+id/forget_password"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="@string/forget_password"-->
-<!--                android:textColor="@color/blue"-->
-<!--                android:textSize="16dp"-->
-<!--                android:layout_marginTop="8dp"-->
-<!--                android:textStyle="bold"-->
-<!--                android:layout_gravity="end"-->
-<!--                android:visibility="visible" />-->
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 

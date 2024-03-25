@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.mypostsapp.AlertDialogUtils
-import com.example.mypostsapp.UpdateProfileActivity
 import com.example.mypostsapp.MainActivity
 import com.example.mypostsapp.R
 import com.example.mypostsapp.databinding.FragmentCreateProfileBinding

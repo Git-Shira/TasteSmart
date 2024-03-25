@@ -19,10 +19,6 @@ import com.example.mypostsapp.ui.Login.LoginViewModel
 
 class LoginFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = LoginFragment()
-    }
-
     private lateinit var binding: LoginFragmentBinding
     private lateinit var viewModel: LoginViewModel
     private lateinit var loadingDialog: ProgressDialog
@@ -48,7 +44,6 @@ class LoginFragment : Fragment() {
             loadingDialog.dismiss()
             AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)
         }
-
         viewModel.onSignInSuccess.observe(viewLifecycleOwner) {
             loadingDialog.dismiss()
             startActivity(Intent(requireContext(), MainActivity::class.java))

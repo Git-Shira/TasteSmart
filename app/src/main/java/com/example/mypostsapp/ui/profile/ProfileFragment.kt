@@ -7,20 +7,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.mypostsapp.AlertDialogUtils
-import com.example.mypostsapp.UpdateProfileActivity
-import com.example.mypostsapp.PostsActivity
+import com.example.mypostsapp.ui.posts.PostsActivity
 import com.example.mypostsapp.R
 import com.example.mypostsapp.databinding.FragmentProfileBinding
 import com.example.mypostsapp.ui.Login.LoginActivity
 import com.example.mypostsapp.ui.posts.PostsScreenType
 
 class ProfileFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = ProfileFragment()
-    }
 
     private lateinit var viewModel: ProfileViewModel
     lateinit var binding: FragmentProfileBinding
@@ -30,13 +26,13 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
         binding = FragmentProfileBinding.inflate(inflater)
         binding.edit.setOnClickListener {
-            startActivity(
-                Intent(requireContext(), UpdateProfileActivity::class.java).apply {
-                    putExtra("user", viewModel.userLD.value)
-                })
+            val navController = findNavController()
+            val action = ProfileFragmentDirections.actionOpenProfileActiviy(viewModel.userLD.value)
+            navController.navigate(action)
         }
         binding.logOut.setOnClickListener {
             AlertDialogUtils.showAlertWithButtons(requireContext(), getString(R.string.alarm), getString(R.string.are_you_sure), { dialog, p1 ->
@@ -47,14 +43,14 @@ class ProfileFragment : Fragment() {
         }
 
         binding.myPosts.setOnClickListener {
-            startActivity(Intent(requireContext(), PostsActivity::class.java).apply {
-                putExtra("type", PostsScreenType.MY_POSTS)
-            })
+            val navController = findNavController()
+            val action = ProfileFragmentDirections.actionPostsActiviy(PostsScreenType.MY_POSTS)
+            navController.navigate(action)
         }
         binding.likedPosts.setOnClickListener {
-            startActivity(Intent(requireContext(), PostsActivity::class.java).apply {
-                putExtra("type", PostsScreenType.LIKED)
-            })
+            val navController = findNavController()
+            val action = ProfileFragmentDirections.actionPostsActiviy(PostsScreenType.LIKED)
+            navController.navigate(action)
         }
         return binding.root
     }

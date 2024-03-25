@@ -17,15 +17,15 @@
         android:theme="@style/Theme.MyPostsApp"
         tools:targetApi="31">
         <activity
-            android:name=".UpdateProfileActivity"
+            android:name=".ui.createProfile.UpdateProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".PostsActivity"
+            android:name=".ui.posts.PostsActivity"
             android:exported="false"
             android:label="@string/title_activity_posts"
             android:theme="@style/Theme.MyPostsApp" />
         <activity
-            android:name=".CreateOrUpdatePostActivity"
+            android:name=".ui.posts.CreateOrUpdatePostActivity"
             android:exported="false" />
         <activity
             android:name=".ui.Login.LoginActivity"

@@ -79,7 +79,8 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="$USER_HOME$/Downloads/WhatsApp Image 2024-03-17 at 12.49.56.jpeg" />
+                                                <entry key="imagePath" value="$USER_HOME$/Downloads/app_icon.jpeg" />
+                                                <entry key="scalingPercent" value="73" />
                                               </map>
                                             </option>
                                           </PersistentState>

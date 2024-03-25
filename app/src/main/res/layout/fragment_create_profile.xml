@@ -2,8 +2,9 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/light_grey"
     android:padding="16dp">
 
     <LinearLayout
@@ -60,6 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
+                android:background="@drawable/border"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -82,6 +84,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
+                android:background="@drawable/border"
+
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -99,14 +103,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:focusable="false"
             android:hint="@string/please_enter_pass">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/passwordET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="false"
+                android:inputType="textPassword"
+                android:background="@drawable/border"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id ("com.google.devtools.ksp")
-    id ("androidx.navigation.safeargs.kotlin")
+    id("androidx.navigation.safeargs")
     kotlin("kapt") // Add this line for Kotlin annotation processing
 }
 

@@ -8,17 +8,43 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.example.mypostsapp.ui.posts.PostsFragment"
-        android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.mypostsapp.ui.maps.MapsFragment"
-        android:label="@string/map"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.mypostsapp.ui.profile.ProfileFragment"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_open_profile_activiy"
+            app:destination="@id/update_profile_activity" />
+
+        <action
+            android:id="@+id/action_posts_activiy"
+            app:destination="@id/posts_activity" />
+    </fragment>
+
+    <activity
+        android:id="@+id/update_profile_activity"
+        android:name="com.example.mypostsapp.ui.createProfile.UpdateProfileActivity">
+
+        <argument
+            android:name="user"
+            app:argType="com.example.mypostsapp.entities.User"
+            app:nullable="true" />
+    </activity>
+
+    <activity
+        android:id="@+id/posts_activity"
+        android:name="com.example.mypostsapp.ui.posts.PostsActivity">
+
+        <argument
+            android:name="type"
+            app:argType="com.example.mypostsapp.ui.posts.PostsScreenType"
+            />
+    </activity>
 </navigation>

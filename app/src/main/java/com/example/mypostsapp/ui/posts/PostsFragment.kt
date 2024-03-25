@@ -10,28 +10,14 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.example.mypostsapp.CreateOrUpdatePostActivity
-import com.example.mypostsapp.PostsActivity
+import com.example.mypostsapp.ui.posts.CreateOrUpdatePostActivity
 import com.example.mypostsapp.R
 import com.example.mypostsapp.databinding.FragmentHomeBinding
 import com.example.mypostsapp.entities.Post
 import com.example.mypostsapp.entities.User
 
 class PostsFragment : Fragment() {
-
-
-    companion object {
-        fun newInstance(type: PostsScreenType?): PostsFragment {
-            val args = Bundle()
-            args.putSerializable("type", type)
-            val fragment = PostsFragment()
-            fragment.arguments = args
-            return fragment
-        }
-    }
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!

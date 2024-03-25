@@ -26,10 +26,10 @@ class CreateOrUpdateViewModel : ViewModel() {
 
     fun savePost(
         uid: String?,
-        position: Int?,
         currentUser: User?,
         description: String,
         imageBitmap: Bitmap?,
+        postImageUrl: String?,
         likeUserIds: ArrayList<String>?,
         location: PostLocation?
     ) {
@@ -38,36 +38,33 @@ class CreateOrUpdateViewModel : ViewModel() {
             val baos = ByteArrayOutputStream()
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
             val imageData = baos.toByteArray()
-            // Upload file to Firebase Storage
-            // Upload file to Firebase Storage
             val uploadTask = imageRef.putBytes(imageData)
             uploadTask.addOnSuccessListener { taskSnapshot: UploadTask.TaskSnapshot? ->
                 imageRef.downloadUrl.addOnSuccessListener { uri: Uri ->
-                    savePostToDataBase(uid, position, currentUser, description, uri.toString(), likeUserIds, location)
+                    savePostToDataBase(uid, uri.toString(), currentUser, description, likeUserIds, location)
                 }
             }.addOnFailureListener { e: Exception ->
                 // Handle failed upload
                 Log.e("TAG", "Upload failed: " + e.message)
             }
         } ?: run {
-            savePostToDataBase(uid, position, currentUser, description, null, likeUserIds, location)
+            savePostToDataBase(uid, postImageUrl, currentUser, description, likeUserIds, location)
         }
 
     }
 
     private fun savePostToDataBase(
         uid: String?,
-        position: Int?,
+        postImageUrl: String?,
         user: User?,
         description: String,
-        uri: String?,
         likeUserIds: ArrayList<String>?,
         location: PostLocation?
     ) {
         val _uid = uid ?: UUID.randomUUID().toString()
         val postData =
             Post(
-                _uid, description, uri, user, likeUserIds,
+                _uid, description, postImageUrl, user, likeUserIds,
                 System.currentTimeMillis(), location
             )
 
