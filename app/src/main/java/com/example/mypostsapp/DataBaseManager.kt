@@ -27,12 +27,20 @@ class DataBaseManager {
                 .addOnCompleteListener(listener)
         }
 
-        fun fetchPosts(viewModelScope: CoroutineScope, posts: ArrayList<Post>, onDone: Runnable) {
+        fun fetchPosts(viewModelScope: CoroutineScope, loadFromRoom: Boolean, posts: ArrayList<Post>, onDone: Runnable) {
             posts.clear()
-            viewModelScope.launch(Dispatchers.IO) {
-                posts.addAll(RoomManager.database.postDao().getAll())
-                onDone.run()
+            if (loadFromRoom) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    posts.addAll(RoomManager.database.postDao().getAll())
+                    onDone.run()
+                    fetchPostsFromFireBase(posts, onDone)
+                }
+            } else {
+                fetchPostsFromFireBase(posts, onDone)
             }
+        }
+
+        private fun fetchPostsFromFireBase(posts: ArrayList<Post>, onDone: Runnable) {
             FirebaseFirestore.getInstance()
                 .collection(POSTS)
                 .get()

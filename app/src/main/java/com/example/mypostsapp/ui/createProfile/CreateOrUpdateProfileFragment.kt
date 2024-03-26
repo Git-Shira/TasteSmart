@@ -21,6 +21,7 @@ import com.example.mypostsapp.MainActivity
 import com.example.mypostsapp.R
 import com.example.mypostsapp.databinding.FragmentCreateProfileBinding
 import com.example.mypostsapp.entities.User
+import com.example.mypostsapp.ui.Login.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class CreateOrUpdateProfileFragment : Fragment() {
@@ -126,6 +127,12 @@ class CreateOrUpdateProfileFragment : Fragment() {
                 loadingDialog.show()
                 viewModel.createOrUpdateProfile( binding.emailET.text.toString(), binding.passwordET.text.toString(), binding.fullNameET.text.toString(), imageBitmap)
             }
+        }
+
+        if (activity is LoginActivity) {
+            binding.save.text = getString(R.string.sign_up)
+        } else {
+            binding.save.text = getString(R.string.save)
         }
     }
 

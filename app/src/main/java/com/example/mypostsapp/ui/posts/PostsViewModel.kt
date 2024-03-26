@@ -91,23 +91,12 @@ class PostsViewModel : ViewModel() {
         }
     }
 
-    fun showMyPostOnly() {
-        myPostsOnly.clear()
-        myPostsOnly.addAll(allPosts.filter { it.createdUser?.uid == FirebaseAuth.getInstance().uid })
-        publishPostsList(myPostsOnly)
-    }
-
-    fun showAllPosts() {
-        publishPostsList(allPosts)
-
-    }
-
     fun setPostsType(postsScreenType: PostsScreenType?) {
         this.type = postsScreenType ?: PostsScreenType.ALL
     }
 
-    fun fetchPosts() {
-        DataBaseManager.fetchPosts(viewModelScope, allPosts) {
+    fun fetchPosts(loadFromRoom: Boolean = true) {
+        DataBaseManager.fetchPosts(viewModelScope, loadFromRoom, allPosts) {
             when (type) {
                 PostsScreenType.ALL -> {
                     publishPostsList(allPosts)

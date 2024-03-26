@@ -15,7 +15,7 @@ class MapViewModel : ViewModel() {
     val postsLD: MutableLiveData<ArrayList<Post>> = MutableLiveData()
 
     init {
-        DataBaseManager.fetchPosts(viewModelScope, posts, Runnable {
+        DataBaseManager.fetchPosts(viewModelScope, true, posts, Runnable {
             postsLD.postValue(posts)
             viewModelScope.launch(Dispatchers.IO) {
                 posts.forEach {

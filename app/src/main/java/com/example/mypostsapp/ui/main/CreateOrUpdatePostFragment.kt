@@ -122,10 +122,10 @@ class CreateOrUpdatePostFragment : Fragment() {
         findMyLocationIfHasAccess()
         loadingDialog = ProgressDialog(requireContext())
         loadingDialog?.setMessage(getString(R.string.please_wait))
-        viewModel.onSuccess.observe(viewLifecycleOwner) {
+        viewModel.onSuccessLD.observe(viewLifecycleOwner) {
             onSuccess(it.first, it.second)
         }
-        viewModel.onError.observe(viewLifecycleOwner) {
+        viewModel.onErrorLD.observe(viewLifecycleOwner) {
             loadingDialog?.dismiss()
             AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)
         }
@@ -136,6 +136,7 @@ class CreateOrUpdatePostFragment : Fragment() {
             .circleCrop()
             .into(binding.postDataContainer.profileImage)
 
+        binding.header.setText(if (post == null) R.string.create_post else R.string.update_post)
         binding.postDataContainer.name.text = currentUser?.name
         binding.postDataContainer.camera.setOnClickListener { openCamera() }
         binding.postDataContainer.gallery.setOnClickListener { openGallery() }
@@ -147,7 +148,7 @@ class CreateOrUpdatePostFragment : Fragment() {
             binding.postDataContainer.description.setText(it.description)
         }
 
-        binding.save.setText(if (post == null) R.string.save else R.string.update)
+        binding.save.setText(if (post == null) R.string.create else R.string.update)
         binding.save.setOnClickListener { savePost() }
         binding.postDataContainer.description.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
@@ -161,7 +162,7 @@ class CreateOrUpdatePostFragment : Fragment() {
         })
         binding.postDataContainer.title.visibility = if (binding.postDataContainer.description.text?.length == 0) View.VISIBLE else View.GONE
         binding.close.setOnClickListener { activity?.finish() }
-        binding.postDataContainer.email.setText(post?.createdUser?.email ?: FirebaseAuth.getInstance().currentUser?.email)
+        binding.postDataContainer.email.text = post?.createdUser?.email ?: FirebaseAuth.getInstance().currentUser?.email
     }
 
     private fun onSuccess(post: Post?, user: User?) {

@@ -74,6 +74,10 @@ class PostsFragment : Fragment() {
     ): View {
         postsViewModel = ViewModelProvider(this).get(PostsViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        binding.swiperefresh.isRefreshing = true
+        binding.swiperefresh.setOnRefreshListener {
+            postsViewModel?.fetchPosts(false)
+        }
         return binding.root
     }
 
@@ -94,6 +98,7 @@ class PostsFragment : Fragment() {
         postsViewModel?.setPostsType(myType)
         postsViewModel?.fetchPosts()
         postsViewModel?.postsLD?.observe(viewLifecycleOwner) {
+            binding.swiperefresh.isRefreshing = false
             adapter.setItems(it)
         }
 

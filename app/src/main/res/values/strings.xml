@@ -12,6 +12,7 @@
     <string name="error">Error!</string>
     <string name="please_wait">Please wait...</string>
     <string name="save">Save</string>
+    <string name="create">Create</string>
     <string name="full_name">Full Name</string>
     <string name="add_from_gallery">Add From Gallery</string>
     <string name="take_a_photo">Take A Photo</string>
@@ -64,4 +65,5 @@
         nulla. Donec rhoncus libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus vestibulum. Fusce dictum
         libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="update_post">Update Post</string>
 </resources>

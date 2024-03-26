@@ -21,8 +21,8 @@ import java.util.UUID
 
 class CreateOrUpdateViewModel : ViewModel() {
 
-    val onSuccess: MutableLiveData<Pair<Post, User?>> = MutableLiveData()
-    val onError: MutableLiveData<String> = MutableLiveData()
+    val onSuccessLD: MutableLiveData<Pair<Post, User?>> = MutableLiveData()
+    val onErrorLD: MutableLiveData<String> = MutableLiveData()
 
     fun savePost(
         uid: String?,
@@ -70,9 +70,9 @@ class CreateOrUpdateViewModel : ViewModel() {
 
         DataBaseManager.savePost(postData, user) {
             if (it.isSuccessful) {
-                onSuccess.postValue(Pair(postData, user))
+                onSuccessLD.postValue(Pair(postData, user))
             } else {
-                onError.postValue(it.exception?.message.toString())
+                onErrorLD.postValue(it.exception?.message.toString())
             }
         }
 

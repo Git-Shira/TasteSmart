@@ -40,10 +40,12 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         loadingDialog = ProgressDialog(requireContext())
         loadingDialog.setMessage(getString(R.string.please_wait))
+
         viewModel.onError.observe(viewLifecycleOwner) {
             loadingDialog.dismiss()
             AlertDialogUtils.showAlert(requireContext(), getString(R.string.error), it)
         }
+
         viewModel.onSignInSuccess.observe(viewLifecycleOwner) {
             loadingDialog.dismiss()
             startActivity(Intent(requireContext(), MainActivity::class.java))

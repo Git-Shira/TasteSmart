@@ -11,7 +11,6 @@ import java.io.Serializable
 
 @Entity(tableName = "posts")
 data class Post(
-
     @PrimaryKey var uid: String = "",
     var description: String? = null,
     var image: String? = null,
