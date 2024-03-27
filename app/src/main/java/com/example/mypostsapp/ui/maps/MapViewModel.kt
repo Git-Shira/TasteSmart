@@ -15,13 +15,16 @@ class MapViewModel : ViewModel() {
     val postsLD: MutableLiveData<ArrayList<Post>> = MutableLiveData()
 
     init {
-        DataBaseManager.fetchPosts(viewModelScope, true, posts, Runnable {
+        DataBaseManager.fetchPosts(viewModelScope, true, posts) {saveToRoom ->
             postsLD.postValue(posts)
-            viewModelScope.launch(Dispatchers.IO) {
-                posts.forEach {
-                    RoomManager.database.postDao().insertPost(it)
+            if (saveToRoom) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    posts.forEach {
+                        RoomManager.database.postDao().insertPost(it)
+                    }
                 }
             }
-        })
+
+        }
     }
 }

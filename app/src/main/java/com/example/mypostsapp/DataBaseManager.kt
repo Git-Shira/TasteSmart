@@ -27,12 +27,12 @@ class DataBaseManager {
                 .addOnCompleteListener(listener)
         }
 
-        fun fetchPosts(viewModelScope: CoroutineScope, loadFromRoom: Boolean, posts: ArrayList<Post>, onDone: Runnable) {
+        fun fetchPosts(viewModelScope: CoroutineScope, loadFromRoom: Boolean, posts: ArrayList<Post>, onDone: (saveToRoom: Boolean) -> Unit) {
             posts.clear()
             if (loadFromRoom) {
                 viewModelScope.launch(Dispatchers.IO) {
                     posts.addAll(RoomManager.database.postDao().getAll())
-                    onDone.run()
+                    onDone.invoke(false)
                     fetchPostsFromFireBase(posts, onDone)
                 }
             } else {
@@ -40,7 +40,7 @@ class DataBaseManager {
             }
         }
 
-        private fun fetchPostsFromFireBase(posts: ArrayList<Post>, onDone: Runnable) {
+        private fun fetchPostsFromFireBase(posts: ArrayList<Post>, onDone: (saveToRoom: Boolean) -> Unit) {
             FirebaseFirestore.getInstance()
                 .collection(POSTS)
                 .get()
@@ -57,7 +57,7 @@ class DataBaseManager {
                                 post.createdUser = userSnapshot.toObject(User::class.java)
                                 posts.add(post)
                                 if (posts.size == size) {
-                                    onDone.run()
+                                    onDone.invoke(true)
                                 }
                             }
                     }
