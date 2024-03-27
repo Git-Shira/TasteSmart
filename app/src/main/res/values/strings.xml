@@ -66,4 +66,5 @@
         libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="update_post">Update Post</string>
+    <string name="there_are_no_post_to_display">There are no posts to display.</string>
 </resources>

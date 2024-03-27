@@ -99,6 +99,8 @@ class PostsFragment : Fragment() {
         postsViewModel?.fetchPosts()
         postsViewModel?.postsLD?.observe(viewLifecycleOwner) {
             binding.swiperefresh.isRefreshing = false
+            binding.emptyState.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
             adapter.setItems(it)
         }
 

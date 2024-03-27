@@ -6,9 +6,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-
 import com.example.mypostsapp.entities.Post
-import com.example.mypostsapp.entities.User
 
 @Dao
 interface PostDao {
@@ -20,6 +18,9 @@ interface PostDao {
 
     @Delete
     suspend fun deletePost(post: Post)
+
+    @Query("DELETE FROM posts")
+    suspend fun clearPostsTable()
 
     // Add other methods for CRUD operations
 }

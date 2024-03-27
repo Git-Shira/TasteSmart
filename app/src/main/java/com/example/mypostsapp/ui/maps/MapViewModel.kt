@@ -19,6 +19,7 @@ class MapViewModel : ViewModel() {
             postsLD.postValue(posts)
             if (saveToRoom) {
                 viewModelScope.launch(Dispatchers.IO) {
+                    RoomManager.database.postDao().clearPostsTable()
                     posts.forEach {
                         RoomManager.database.postDao().insertPost(it)
                     }

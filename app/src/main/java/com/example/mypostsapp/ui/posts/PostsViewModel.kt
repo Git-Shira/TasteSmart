@@ -44,14 +44,17 @@ class PostsViewModel : ViewModel() {
 
         }
         this.user = user
-        publishPostsList(relevantPosts)
+        publishPostsList(relevantPosts, false)
     }
 
-    private fun publishPostsList(postToPublish: ArrayList<Post>) {
+    private fun publishPostsList(postToPublish: ArrayList<Post>, clearTable: Boolean = true) {
         postToPublish.sortByDescending { it.created }
         relevantPosts = postToPublish
         postsLD.postValue(relevantPosts)
         viewModelScope.launch(Dispatchers.IO) {
+            if (clearTable) {
+                RoomManager.database.postDao().clearPostsTable()
+            }
             postsLD.value?.forEach {
                 RoomManager.database.postDao().insertPost(it)
             }
