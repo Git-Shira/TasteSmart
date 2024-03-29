@@ -34,7 +34,7 @@ class CreateOrUpdateViewModel : ViewModel() {
         location: PostLocation?
     ) {
         imageBitmap?.let {
-            val imageRef: StorageReference = FirebaseStorage.getInstance().reference.child("images/" + String + ".jpg")
+            val imageRef: StorageReference = FirebaseStorage.getInstance().reference.child("images/$uid.jpg")
             val baos = ByteArrayOutputStream()
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
             val imageData = baos.toByteArray()

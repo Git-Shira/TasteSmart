@@ -36,7 +36,7 @@ class CreateProfileViewModel : ViewModel() {
     private fun saveUserOnDataBase(uid: String, email: String?, fullName: String, imageBitmap: Bitmap?) {
         imageBitmap?.let {
             // the image name should be the user uuid - uniqe
-            val imageRef: StorageReference = storage.reference.child("images/" + String + ".jpg")
+            val imageRef: StorageReference = storage.reference.child("images/$uid.jpg")
             val baos = ByteArrayOutputStream()
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
             val imageData = baos.toByteArray()
